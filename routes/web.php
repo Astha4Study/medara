@@ -4,6 +4,8 @@ use App\Http\Controllers\AdminAddResepsionisAndApotekerAndDoktorController;
 use App\Http\Controllers\AdminKlinikController;
 use App\Http\Controllers\AdminLayananController;
 use App\Http\Controllers\AdminPengaturanController;
+use App\Http\Controllers\ApotekerKlinikController;
+use App\Http\Controllers\ApotekerObatController;
 use App\Http\Controllers\DokterAntrianController;
 use App\Http\Controllers\DokterCatatanLayananController;
 use App\Http\Controllers\DokterKlinikController;
@@ -90,6 +92,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('antrian/{antrian}/tangani', [DokterCatatanLayananController::class, 'store'])
                 ->name('tangani.store');
 
+        });
+
+    Route::middleware(['auth', 'role:apoteker'])
+        ->prefix('apoteker')
+        ->as('apoteker.')
+        ->group(function (): void {
+            Route::resource('klinik', ApotekerKlinikController::class)
+                ->only(['index']);
+            Route::resource('daftar-obat', ApotekerObatController::class)
+                ->parameters(['daftar-obat' => 'obat'])
+                ->names('daftarobat')
+                ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
         });
 });
 
