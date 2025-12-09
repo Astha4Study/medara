@@ -3,7 +3,7 @@
 use App\Http\Controllers\AdminAddResepsionisAndApotekerAndDoktorController;
 use App\Http\Controllers\AdminKlinikController;
 use App\Http\Controllers\AdminLayananController;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\AdminPengaturanController;
 use App\Http\Controllers\DokterAntrianController;
 use App\Http\Controllers\DokterCatatanLayananController;
 use App\Http\Controllers\DokterKlinikController;
@@ -48,6 +48,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('layanan', AdminLayananController::class)
                 ->parameters(['layanan' => 'layanan'])
                 ->only(['index', 'create', 'edit', 'store', 'update', 'destroy']);
+            Route::resource('pengaturan', AdminPengaturanController::class)
+                ->only(['edit', 'update']);
         });
 
     Route::middleware(['auth', 'role:resepsionis'])

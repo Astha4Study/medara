@@ -55,6 +55,7 @@ class ResepsionisPasienController extends Controller
         $klinik = Klinik::where('created_by', $user->created_by)->first();
 
         $validated = $request->validate([
+            'nomor_pasien' => 'nullable|string|max:30|unique:pasien,nomor_pasien',
             'nama_lengkap' => 'required|string|max:255',
             'nik' => 'required|string|size:16|unique:pasien,nik',
             'jenis_kelamin' => 'required|in:L,P',
@@ -72,7 +73,7 @@ class ResepsionisPasienController extends Controller
 
         $pasien = Pasien::create($validated);
 
-        return redirect()->route('resepsionis.antrian.createForPasien', ['pasien' => $pasien->id]);
+        return redirect()->route('resepsionis.antrian.createForPasien', ['pasien' => $pasien]);
     }
 
     /**
@@ -109,6 +110,7 @@ class ResepsionisPasienController extends Controller
         }
 
         $validated = $request->validate([
+            'nomor_pasien' => 'nullable|string|max:30|unique:pasien,nomor_pasien,' . $pasien->id,
             'nama_lengkap' => 'required|string|max:255',
             'nik' => 'required|string|size:16|unique:pasien,nik,' . $pasien->id,
             'jenis_kelamin' => 'required|in:L,P',

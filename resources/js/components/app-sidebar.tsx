@@ -21,6 +21,7 @@ import {
     Folder,
     Hospital,
     LayoutGrid,
+    Settings,
     Ticket,
     UserRoundPlus,
     Users,
@@ -56,19 +57,9 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         {
-            title: 'Klinik',
-            href: `${prefix}/klinik`,
-            icon: Hospital,
-        },
-        {
             title: 'Pasien',
             href: `${prefix}/pasien`,
             icon: Users,
-        },
-        {
-            title: 'Layanan Pasien',
-            href: `${prefix}/catatan-layanan`,
-            icon: ClipboardList,
         },
         {
             title: 'Antrian',
@@ -76,9 +67,9 @@ export function AppSidebar() {
             icon: Ticket,
         },
         {
-            title: 'Pembayaran',
-            href: `${prefix}/pembayaran`,
-            icon: CreditCard,
+            title: 'Klinik',
+            href: `${prefix}/klinik`,
+            icon: Hospital,
         },
         {
             title: 'Tambah Layanan',
@@ -86,9 +77,14 @@ export function AppSidebar() {
             icon: BookPlus,
         },
         {
-            title: 'Tambah User',
-            href: `${prefix}/tambah-user`,
-            icon: UserRoundPlus,
+            title: 'Layanan Pasien',
+            href: `${prefix}/catatan-layanan`,
+            icon: ClipboardList,
+        },
+        {
+            title: 'Pembayaran',
+            href: `${prefix}/pembayaran`,
+            icon: CreditCard,
         },
         {
             title: 'Kelola Admin',
@@ -113,14 +109,14 @@ export function AppSidebar() {
             (item) =>
                 item.title !== 'Pasien' &&
                 item.title !== 'Kelola Admin' &&
-                item.title !== 'Antrian',
+                item.title !== 'Antrian' &&
+                item.title !== 'Pembayaran',
         );
     }
 
     if (role === 'resepsionis' || role === 'dokter') {
         mainNavItems = mainNavItems.filter(
             (item) =>
-                item.title !== 'Tambah User' &&
                 item.title !== 'Kelola Admin' &&
                 item.title !== 'Tambah Layanan',
         );
@@ -136,7 +132,7 @@ export function AppSidebar() {
         );
     }
 
-    const footerNavItems: NavItem[] = [
+    const footerNavRepoItems: NavItem[] = [
         {
             title: 'Repository',
             href: 'https://github.com/laravel/react-starter-kit',
@@ -148,6 +144,26 @@ export function AppSidebar() {
             icon: BookOpen,
         },
     ];
+
+    let footerNavItems = [
+        {
+            title: 'Tambah User',
+            href: `${prefix}/tambah-user`,
+            icon: UserRoundPlus,
+        },
+        {
+            title: 'Pengaturan',
+            href: `${prefix}/pengaturan`,
+            icon: Settings,
+        },
+    ];
+
+    if (role === 'dokter') {
+        footerNavItems = footerNavItems.filter(
+            (item) =>
+                item.title !== 'Tambah User' && item.title !== 'Pengaturan',
+        );
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">

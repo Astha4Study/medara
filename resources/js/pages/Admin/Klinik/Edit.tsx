@@ -20,6 +20,7 @@ type Klinik = {
     kapasitas_total?: number;
     kapasitas_tersedia?: number;
     punya_apoteker?: boolean;
+    punya_server?: boolean;
     gambar?: File | null;
 };
 
@@ -47,6 +48,7 @@ export default function KlinikEditAdmin({ klinik }: Props) {
         kapasitas_total: klinik.kapasitas_total ?? 0,
         kapasitas_tersedia: klinik.kapasitas_tersedia ?? 0,
         punya_apoteker: Boolean(klinik.punya_apoteker),
+        punya_server: Boolean(klinik.punya_server),
         gambar: undefined as File | undefined,
     });
 

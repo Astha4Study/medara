@@ -11,7 +11,6 @@ import {
 import React, { useState } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import MarkerDraggableOn from './mark-leaflet-on';
-import { Switch } from './ui/switch';
 
 interface FormCreateKlinikProps {
     data: any;
@@ -264,29 +263,6 @@ const FormCreateKlinik: React.FC<FormCreateKlinikProps> = ({
                     onChange={handleChangeFile}
                     className="block w-full cursor-pointer rounded-lg border border-gray-200 text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100"
                 />
-            </div>
-
-            <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                    Apakah klinik memiliki apoteker?
-                </label>
-
-                <div className="flex items-center rounded-lg border border-gray-200 px-4 py-2.5">
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            checked={data.punya_apoteker}
-                            onCheckedChange={(value) =>
-                                setData('punya_apoteker', value)
-                            }
-                            className="cursor-pointer data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-emerald-100"
-                        />
-                        <span className="text-sm text-gray-600">
-                            {data.punya_apoteker
-                                ? 'Ya, ada apoteker'
-                                : 'Tidak ada apoteker'}
-                        </span>
-                    </div>
-                </div>
             </div>
 
             <div className="mt-4 flex justify-end gap-3">

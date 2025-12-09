@@ -14,6 +14,7 @@ class Pasien extends Model
     protected $table = 'pasien';
 
     protected $fillable = [
+        'nomor_pasien',
         'nama_lengkap',
         'nik',
         'jenis_kelamin',
@@ -57,17 +58,37 @@ class Pasien extends Model
         parent::boot();
 
         static::creating(function ($pasien) {
-            // Ambil user yang sedang login
             $user = Auth::user();
 
             if ($user && $user->hasRole('admin')) {
-                // Ambil klinik yang dibuat oleh admin tersebut
                 $klinik = Klinik::where('created_by', $user->id)->first();
-
                 if ($klinik) {
                     $pasien->klinik_id = $klinik->id;
                 }
             }
+
+            $klinik = Klinik::find($pasien->klinik_id);
+
+            if (!$klinik) {
+                throw new \Exception('Klinik tidak ditemukan, nomor pasien gagal dibuat.');
+            }
+
+            if (!$klinik->kode_klinik) {
+                throw new \Exception('Kode klinik belum diisi, nomor pasien gagal dibuat.');
+            }
+
+            $tanggal = now()->format('Ymd');
+
+            $last = self::where('klinik_id', $pasien->klinik_id)
+                ->whereDate('created_at', now()->toDateString())
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $next = $last
+                ? intval(substr($last->nomor_pasien, -4)) + 1
+                : 1;
+
+            $pasien->nomor_pasien = "{$klinik->kode_klinik}-{$tanggal}-" . str_pad($next, 4, '0', STR_PAD_LEFT);
         });
     }
 }

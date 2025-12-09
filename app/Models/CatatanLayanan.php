@@ -12,10 +12,12 @@ class CatatanLayanan extends Model
     protected $table = 'catatan_layanan';
 
     protected $fillable = [
+        'sumber_input',
         'pasien_id',
         'klinik_id',
         'dokter_id',
         'antrian_id',
+        'nomor_pasien',
         'tanggal_kunjungan',
         'keluhan_utama',
         'detail_keluhan',
@@ -27,6 +29,11 @@ class CatatanLayanan extends Model
     public function pasien()
     {
         return $this->belongsTo(Pasien::class, 'pasien_id');
+    }
+
+    public function nomorPasien()
+    {
+        return $this->belongsTo(Pasien::class, 'nomor_pasien', 'nomor_pasien');
     }
 
     public function klinik()

@@ -8,6 +8,7 @@ import { useState } from 'react';
 
 type Pasien = {
     id: number;
+    nomor_pasien: string;
     nama_lengkap: string;
     nik: string;
     jenis_kelamin: 'L' | 'P';
@@ -26,6 +27,7 @@ type PageProps = {
 };
 
 const listTable = [
+    'Nomor Pasien',
     'Nama Pasien',
     'NIK',
     'Gender',
@@ -167,6 +169,9 @@ export default function PasienIndexResepsionis() {
                                                 />
                                             </td>
                                             <td className="px-6 py-4 font-medium text-gray-900">
+                                                {item.nomor_pasien}
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-gray-700">
                                                 {item.nama_lengkap}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">

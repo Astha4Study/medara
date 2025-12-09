@@ -13,6 +13,7 @@ class Klinik extends Model
     protected $table = 'klinik';
 
     protected $fillable = [
+        'kode_klinik',
         'nama_klinik',
         'jenis_klinik',
         'alamat',
@@ -28,6 +29,7 @@ class Klinik extends Model
         'kapasitas_total',
         'kapasitas_tersedia',
         'punya_apoteker',
+        'punya_server',
         'created_by',
     ];
 
@@ -57,6 +59,25 @@ class Klinik extends Model
         if ($this->gambar && Storage::disk('public')->exists($this->gambar)) {
             Storage::disk('public')->delete($this->gambar);
         }
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($klinik) {
+            if (!$klinik->kode_klinik && $klinik->nama_klinik) {
+                $words = explode(' ', $klinik->nama_klinik);
+                $initials = '';
+                foreach ($words as $word) {
+                    if (ctype_alpha($word[0])) {
+                        $initials .= strtoupper($word[0]);
+                    }
+                }
+                $klinik->kode_klinik = $initials;
+            }
+        });
+
     }
 
 

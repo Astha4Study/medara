@@ -39,10 +39,6 @@ class AdminKlinikController extends Controller
     {
         $user = Auth::user();
 
-        $request->merge([
-            'punya_apoteker' => filter_var($request->punya_apoteker, FILTER_VALIDATE_BOOLEAN),
-        ]);
-
         $validated = $request->validate([
             'nama_klinik' => 'required|string|max:255',
             'jenis_klinik' => 'required|in:Umum,Gigi,THT,Kulit,Kandungan,Anak,Bedah,Mata,Saraf',
@@ -58,7 +54,6 @@ class AdminKlinikController extends Controller
             'rating' => 'nullable|numeric',
             'kapasitas_total' => 'nullable|integer|min:0',
             'kapasitas_tersedia' => 'nullable|integer|min:0',
-            'punya_apoteker' => 'boolean'
         ]);
 
         $validated['created_by'] = $user->id;
@@ -122,10 +117,6 @@ class AdminKlinikController extends Controller
             abort(403, 'Admin hanya bisa memperbarui klinik yang dibuatnya.');
         }
 
-        $request->merge([
-            'punya_apoteker' => filter_var($request->punya_apoteker, FILTER_VALIDATE_BOOLEAN),
-        ]);
-
         $validated = $request->validate([
             'nama_klinik' => 'required|string|max:255',
             'jenis_klinik' => 'required|in:Umum,Gigi,THT,Kulit,Kandungan,Anak,Bedah,Mata,Saraf',
@@ -141,7 +132,6 @@ class AdminKlinikController extends Controller
             'rating' => 'nullable|numeric',
             'kapasitas_total' => 'nullable|integer|min:0',
             'kapasitas_tersedia' => 'nullable|integer|min:0',
-            'punya_apoteker' => 'boolean'
         ]);
 
         $dataToUpdate = $validated;

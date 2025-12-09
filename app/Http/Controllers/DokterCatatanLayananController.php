@@ -49,6 +49,7 @@ class DokterCatatanLayananController extends Controller
             'antrian' => $antrian,
             'pasien' => $antrian->pasien,
             'keluhan_utama' => $antrian->keluhan,
+            'punya_server' => $antrian->klinik->punya_server,
         ]);
     }
 
@@ -70,11 +71,17 @@ class DokterCatatanLayananController extends Controller
 
         $antrian = Antrian::findOrFail($validated['antrian_id']);
 
-        CatatanLayanan::create([
+        $sumberInput = $antrian->klinik->punya_server ? 'server' : 'manual';
+
+        $nomorPasien = $antrian->pasien->nomor_pasien;
+
+        CatatanLayanan::create(attributes: [
+            'sumber_input' => $sumberInput,
             'pasien_id' => $antrian->pasien_id,
             'klinik_id' => $antrian->klinik_id,
             'dokter_id' => $dokter->id,
             'antrian_id' => $antrian->id,
+            'nomor_pasien' => $nomorPasien,
             'tanggal_kunjungan' => $antrian->tanggal_kunjungan,
             'keluhan_utama' => $antrian->keluhan,
             'detail_keluhan' => $validated['detail_keluhan'],

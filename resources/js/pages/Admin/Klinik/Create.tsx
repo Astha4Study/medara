@@ -21,6 +21,7 @@ export default function KlinikCreateAdmin() {
         kapasitas_tersedia: 0,
         spesialisasi: '',
         punya_apoteker: 0,
+        punya_server: 0,
         gambar: null as File | null,
     });
 
