@@ -21,6 +21,7 @@ import {
     Folder,
     Hospital,
     LayoutGrid,
+    Pill,
     Settings,
     Ticket,
     UserRoundPlus,
@@ -72,12 +73,17 @@ export function AppSidebar() {
             icon: Hospital,
         },
         {
+            title: 'Daftar Obat',
+            href: `${prefix}/daftar-obat`,
+            icon: Pill,
+        },
+        {
             title: 'Tambah Layanan',
             href: `${prefix}/layanan`,
             icon: BookPlus,
         },
         {
-            title: 'Layanan Pasien',
+            title: 'Catatan Pasien',
             href: `${prefix}/catatan-layanan`,
             icon: ClipboardList,
         },
@@ -100,7 +106,8 @@ export function AppSidebar() {
                 item.title !== 'Tambah User' &&
                 item.title !== 'Antrian' &&
                 item.title !== 'Tambah Layanan' &&
-                item.title !== 'Pembayaran',
+                item.title !== 'Pembayaran' &&
+                item.title !== 'Daftar Obat',
         );
     }
 
@@ -114,7 +121,7 @@ export function AppSidebar() {
         );
     }
 
-    if (role === 'resepsionis' || role === 'dokter') {
+    if (role === 'resepsionis') {
         mainNavItems = mainNavItems.filter(
             (item) =>
                 item.title !== 'Kelola Admin' &&
@@ -128,6 +135,19 @@ export function AppSidebar() {
                 item.title !== 'Tambah User' &&
                 item.title !== 'Kelola Admin' &&
                 item.title !== 'Tambah Layanan' &&
+                item.title !== 'Pembayaran' &&
+                item.title !== 'Daftar Obat',
+        );
+    }
+
+    if (role === 'apoteker') {
+        mainNavItems = mainNavItems.filter(
+            (item) =>
+                item.title !== 'Tambah User' &&
+                item.title !== 'Kelola Admin' &&
+                item.title !== 'Tambah Layanan' &&
+                item.title !== 'Pasien' &&
+                item.title !== 'Catatan Pasien' &&
                 item.title !== 'Pembayaran',
         );
     }
@@ -159,6 +179,13 @@ export function AppSidebar() {
     ];
 
     if (role === 'dokter') {
+        footerNavItems = footerNavItems.filter(
+            (item) =>
+                item.title !== 'Tambah User' && item.title !== 'Pengaturan',
+        );
+    }
+
+    if (role === 'apoteker') {
         footerNavItems = footerNavItems.filter(
             (item) =>
                 item.title !== 'Tambah User' && item.title !== 'Pengaturan',
