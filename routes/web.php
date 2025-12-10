@@ -10,6 +10,8 @@ use App\Http\Controllers\DokterAntrianController;
 use App\Http\Controllers\DokterCatatanLayananController;
 use App\Http\Controllers\DokterKlinikController;
 use App\Http\Controllers\DokterPasienController;
+use App\Http\Controllers\DokterResepController;
+use App\Http\Controllers\DokterTindakanController;
 use App\Http\Controllers\ResepsionisAntrianController;
 use App\Http\Controllers\ResepsionisKlinikController;
 use App\Http\Controllers\ResepsionisPasienController;
@@ -91,7 +93,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('tangani.create');
             Route::post('antrian/{antrian}/tangani', [DokterCatatanLayananController::class, 'store'])
                 ->name('tangani.store');
-
+            Route::post('/antrian/{antrian}/tindakan/temp', [DokterCatatanLayananController::class, 'storeTemp'])
+                ->name('tindakan.temp');
+            Route::get('/antrian/{antrian}/resep/create', [DokterResepController::class, 'create'])
+                ->name('resep.create');
+            Route::post('/resep/store-final', [DokterResepController::class, 'storeFinal'])
+                ->name('resep.store-final');
         });
 
     Route::middleware(['auth', 'role:apoteker'])
@@ -103,7 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('daftar-obat', ApotekerObatController::class)
                 ->parameters(['daftar-obat' => 'obat'])
                 ->names('daftarobat')
-                ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+                ->only(['index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
         });
 });
 

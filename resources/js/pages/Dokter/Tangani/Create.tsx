@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -65,13 +65,38 @@ export default function TindakanCreateDokter({
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (
+            !data.detail_keluhan.trim() ||
+            !data.diagnosa.trim() ||
+            !data.tindakan.trim()
+        ) {
+            toast.error('Detail keluhan, diagnosa dan tindakan wajib diisi.');
+            return;
+        }
+
         setConfirmOpen(true);
+    };
+
+    const confirmAndSend = () => {
+        setConfirmOpen(false);
+        post(`/dokter/antrian/${antrian.id}/tindakan/temp`, {
+            onSuccess: () => {
+                router.get(
+                    `/dokter/antrian/${antrian.id}/resep/create`,
+                    {},
+                    { replace: false },
+                );
+            },
+            onError: (errs) => toast.error(Object.values(errs)[0]),
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Daftar Antrian', href: '/dokter/antrian' },
         { title: 'Buat Tindakan Dokter', href: '' },
     ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Buat Tindakan Dokter" />
@@ -96,11 +121,12 @@ export default function TindakanCreateDokter({
                         punyaServer={punya_server}
                     />
                 </div>
+
                 <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>
-                                {punya_server == 0
+                                {punya_server === 0
                                     ? 'Apakah kamu sudah benar-benar mendata pasien ini?'
                                     : 'Apakah kamu sudah selesai mendata pasien ini?'}
                             </AlertDialogTitle>
@@ -112,10 +138,10 @@ export default function TindakanCreateDokter({
                         <AlertDialogFooter>
                             <AlertDialogCancel>Batal</AlertDialogCancel>
                             <AlertDialogAction
-                                className="bg-emerald-600 transition hover:bg-emerald-700"
-                                onClick={submitToServer}
+                                className="bg-emerald-600 hover:bg-emerald-700"
+                                onClick={confirmAndSend}
                             >
-                                Ya, simpan
+                                Ya, lanjut ke resep
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import React from 'react';
 
-interface FormCreateObatProps {
+interface FormCreateObatApotekerProps {
     data: any;
     setData: (key: string, value: any) => void;
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -14,7 +14,7 @@ interface FormCreateObatProps {
     errors: Record<string, string>;
 }
 
-const FormCreateObat: React.FC<FormCreateObatProps> = ({
+const FormCreateObatApoteker: React.FC<FormCreateObatApotekerProps> = ({
     data,
     setData,
     handleSubmit,
@@ -191,4 +191,4 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
     );
 };
 
-export default FormCreateObat;
+export default FormCreateObatApoteker;

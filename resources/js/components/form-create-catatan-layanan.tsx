@@ -287,7 +287,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                     disabled={processing}
                     className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                 >
-                    {processing ? 'Menyimpan...' : 'Simpan'}
+                    {processing ? 'Membuatkan Resep...' : 'Siapkan Resep'}
                 </button>
             </div>
         </form>

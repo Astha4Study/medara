@@ -1,13 +1,15 @@
+import DropdownObatApoteker from '@/components/dropdown-menu-obat-apoteker';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Filter, Plus, Search } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Filter, Plus, Search, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 type DaftarObat = {
     id: number;
     nama_obat: string;
-    satuan: number;
+    jenis_obat: string;
+    satuan: string;
     stok: number;
     harga: number;
 };
@@ -16,7 +18,13 @@ type PageProps = {
     obat: DaftarObat[];
 };
 
-const listTable = ['Nama Obat', 'Satuan', 'Stok Obat', 'Harga Obat'];
+const listTable = [
+    'Nama Obat',
+    'Jenis Obat',
+    'Satuan',
+    'Stok Obat',
+    'Harga Obat',
+];
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Daftar Obat', href: '' }];
 
@@ -25,9 +33,38 @@ export default function DaftarObatIndexApoteker() {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredDaftarObat = obat.filter((p) =>
-        p.nama_obat.toLowerCase().includes(searchQuery.toLowerCase()),
+    /* ---------- fungsi-fungsi checkbox & delete ---------- */
+    const toggleSelect = (id: number) =>
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+        );
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length === obat.length) setSelectedIds([]);
+        else setSelectedIds(obat.map((o) => o.id));
+    };
+
+    const deleteSelected = () => {
+        if (selectedIds.length === 0) return;
+        if (!confirm(`Yakin ingin menghapus ${selectedIds.length} obat?`))
+            return;
+        selectedIds.forEach((id) =>
+            router.delete(`/apoteker/daftar-obat/${id}`),
+        );
+        setSelectedIds([]);
+    };
+
+    /* ---------- filter & format ---------- */
+    const filteredDaftarObat = obat.filter((o) =>
+        o.nama_obat.toLowerCase().includes(searchQuery.toLowerCase()),
     );
+
+    const formatRupiah = (v: number) =>
+        new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+        }).format(v);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -57,8 +94,7 @@ export default function DaftarObatIndexApoteker() {
                             />
                         </div>
                         <button className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-                            <Filter className="h-4 w-4" />
-                            Filter
+                            <Filter className="h-4 w-4" /> Filter
                         </button>
                     </div>
 
@@ -66,8 +102,7 @@ export default function DaftarObatIndexApoteker() {
                         href="/apoteker/daftar-obat/create"
                         className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
                     >
-                        <Plus className="h-4 w-4" />
-                        Tambah Obat
+                        <Plus className="h-4 w-4" /> Tambah Obat
                     </Link>
                 </div>
 
@@ -77,6 +112,18 @@ export default function DaftarObatIndexApoteker() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-gray-200 bg-gray-50">
+                                    <th className="px-6 py-3 text-left">
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                selectedIds.length ===
+                                                    obat.length &&
+                                                obat.length > 0
+                                            }
+                                            onChange={toggleSelectAll}
+                                            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                        />
+                                    </th>
                                     {listTable.map((item) => (
                                         <th
                                             key={item}
@@ -97,25 +144,39 @@ export default function DaftarObatIndexApoteker() {
                                             key={item.id}
                                             className="transition hover:bg-gray-50"
                                         >
+                                            <td className="px-6 py-4">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.includes(
+                                                        item.id,
+                                                    )}
+                                                    onChange={() =>
+                                                        toggleSelect(item.id)
+                                                    }
+                                                    className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                                />
+                                            </td>
                                             <td className="px-6 py-4 font-medium text-gray-900">
                                                 {item.nama_obat}
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-700">
+                                                {item.jenis_obat}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
                                                 {item.satuan}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {item.harga}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-700">
                                                 {item.stok}
                                             </td>
+                                            <td className="px-6 py-4 text-gray-700">
+                                                {formatRupiah(item.harga)}
+                                            </td>
+
                                             <td className="px-6 py-4 text-center">
-                                                <Link
-                                                    href={`/resepsionis/daftar-obat/${item.id}/edit`}
-                                                    className="text-emerald-600 hover:text-emerald-700"
-                                                >
-                                                    Edit
-                                                </Link>
+                                                <DropdownObatApoteker
+                                                    id={item.id}
+                                                    namaObat={item.nama_obat}
+                                                />
                                             </td>
                                         </tr>
                                     ))
@@ -133,13 +194,34 @@ export default function DaftarObatIndexApoteker() {
                         </table>
                     </div>
                 </div>
-                {/* Footer */}
+
+                {/* Footer & Bulk Action */}
                 <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
                     <p>
                         Menampilkan {filteredDaftarObat.length} dari{' '}
                         {obat.length} obat
                     </p>
                 </div>
+
+                {selectedIds.length > 0 && (
+                    <div className="fixed bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-gray-200 bg-white px-6 py-3 shadow-lg">
+                        <span className="text-sm font-medium text-gray-700">
+                            {selectedIds.length} obat dipilih
+                        </span>
+                        <button
+                            onClick={deleteSelected}
+                            className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                        >
+                            <Trash2 className="h-4 w-4" /> Hapus
+                        </button>
+                        <button
+                            onClick={() => setSelectedIds([])}
+                            className="ml-2 text-gray-400 transition hover:text-gray-600"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

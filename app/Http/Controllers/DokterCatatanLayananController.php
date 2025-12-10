@@ -95,6 +95,31 @@ class DokterCatatanLayananController extends Controller
     }
 
     /**
+     * Store temp to a storage.
+     */
+    public function storeTemp(Request $request, Antrian $antrian)
+    {
+        $validated = $request->validate([
+            'keluhan_utama' => 'nullable|string',
+            'detail_keluhan' => 'required|string|max:2000',
+            'diagnosa' => 'required|string|max:200',
+            'tindakan' => 'required|string|max:200',
+            'catatan_lain' => 'nullable|string|max:2000',
+        ]);
+        session([
+            'temp_catatan_layanan' => [
+                'antrian_id' => $antrian->id,
+                'pasien_id' => $antrian->pasien_id,
+                'klinik_id' => $antrian->klinik_id,
+                'data' => $validated,
+            ]
+        ]);
+
+        return back()->with('success', 'Silakan buat resep untuk pasien ini.');
+    }
+
+
+    /**
      * Display the specified resource.
      */
     public function show(string $id)
