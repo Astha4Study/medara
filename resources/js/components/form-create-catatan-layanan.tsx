@@ -182,7 +182,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                         readOnly
                         rows={3}
                         className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-700"
-                        placeholder="Keluhan utama pasien (otomatis dari antrian)"
+                        placeholder="-"
                     />
                 </div>
 
