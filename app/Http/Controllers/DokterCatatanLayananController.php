@@ -23,9 +23,21 @@ class DokterCatatanLayananController extends Controller
         }
 
         $catatan = CatatanLayanan::with(['pasien', 'antrian'])
-            ->where('dokter_id', $dokter->id)
-            ->orderBy('tanggal_kunjungan', 'desc')
-            ->get();
+            ->where('dokter_id', $dokter->id) // gunakan $dokter->id, bukan $user->id
+            ->where('klinik_id', $user->klinik_id)
+            ->latest('updated_at')
+            ->get()
+            ->map(fn($c) => [
+                'id' => $c->id,
+                'nomor_pasien' => $c->pasien?->nomor_pasien ?? '',
+                'nama_lengkap' => $c->pasien?->nama_lengkap ?? '',
+                'tanggal_kunjungan' => $c->tanggal_kunjungan,
+                'keluhan_utama' => $c->keluhan_utama,
+                'diagnosa' => $c->diagnosa,
+                'tindakan' => $c->tindakan,
+                'catatan_lain' => $c->catatan_lain,
+                'tanggal_ditangani' => $c->updated_at->format('d M Y'),
+            ]);
 
         return Inertia::render('Dokter/CatatanLayanan/Index', [
             'catatan' => $catatan,

@@ -88,13 +88,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->only(['index', 'show']);
             Route::resource('antrian', DokterAntrianController::class)
                 ->parameters(['antrian' => 'antrian'])
-                ->only(['index']);
+                ->only(['index', 'update']);
             Route::get('catatan-layanan', [DokterCatatanLayananController::class, 'index'])
                 ->name('catatan-layanan.index');
             Route::get('catatan-layanan/{id}', [DokterCatatanLayananController::class, 'show'])
                 ->name('catatan-layanan.show');
             Route::get('antrian/{antrian}/tangani', [DokterTanganiController::class, 'create'])
                 ->name('tangani.create');
+            Route::get('catatan-layanan', [DokterCatatanLayananController::class, 'index'])
+                ->name('catatan-layanan.index');
             Route::post('antrian/{antrian}/tangani', [DokterCatatanLayananController::class, 'store'])
                 ->name('tangani.store');
             Route::get('antrian/{antrian}/resep/create', [DokterResepController::class, 'create'])

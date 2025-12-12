@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Antrian;
+use App\Models\CatatanLayanan;
+use App\Models\Dokter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -81,7 +83,35 @@ class DokterAntrianController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $user = Auth::user();
+        $dokter = Dokter::where('user_id', $user->id)->firstOrFail();
+
+        $antrian = Antrian::findOrFail($id);
+
+        // Jika antrian ini sudah sedang diperiksa oleh dokter yang sama → langsung masuk lagi
+        if ($antrian->status === 'Sedang diperiksa' && $antrian->dokter_id === $dokter->id) {
+            return redirect()->route('dokter.tangani.create', $antrian->id)
+                ->with('info', 'Anda melanjutkan pemeriksaan pasien yang sedang diperiksa.');
+        }
+
+        // Cek apakah dokter sedang menangani pasien lain (exclude antrian ini)
+        $sedang = Antrian::where('dokter_id', $dokter->id)
+            ->where('status', 'Sedang diperiksa')
+            ->where('id', '!=', $antrian->id) // <-- tambahkan ini
+            ->first();
+
+        if ($sedang) {
+            return redirect()->route('dokter.antrian.index')
+                ->with('error', 'Anda sudah menangani pasien lain. Selesaikan dulu sebelum menangani pasien baru.');
+        }
+
+        // Kalau belum ada pasien aktif, update status
+        $antrian->status = 'Sedang diperiksa';
+        $antrian->dokter_id = $dokter->id;
+        $antrian->save();
+
+        return redirect()->route('dokter.tangani.create', $antrian->id)
+            ->with('success', 'Status antrian berhasil diperbarui menjadi Sedang diperiksa.');
     }
 
     /**

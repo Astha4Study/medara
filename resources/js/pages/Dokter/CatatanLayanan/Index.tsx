@@ -1,64 +1,58 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Filter, Search } from 'lucide-react';
 import { useState } from 'react';
 
-type Pasien = {
+type Catatan = {
     id: number;
     nomor_pasien: string;
     nama_lengkap: string;
-    nik: string;
-    jenis_kelamin: 'L' | 'P';
-    tanggal_lahir?: string | null;
-    umur?: number | null;
-    tempat_lahir?: string | null;
-    alamat: string;
-    no_hp?: string | null;
-    golongan_darah?: string | null;
-    riwayat_penyakit?: string | null;
-    alergi?: string | null;
+    tanggal_kunjungan: string;
+    keluhan_utama: string;
+    diagnosa: string;
+    tindakan: string;
+    catatan_lain: string;
+    tanggal_ditangani: string;
 };
 
 type PageProps = {
-    pasien: Pasien[];
+    catatan: Catatan[];
 };
 
 const listTable = [
     'Nomor Pasien',
     'Nama Pasien',
-    'NIK',
-    'Gender',
-    'Tanggal Lahir',
-    'Umur',
-    'Alamat',
+    'Keluhan Utama',
+    'Diagnosa',
+    'Tindakan',
+    'Tanggal Dikunjungi',
 ];
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Daftar Pasien', href: '' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Catatan Layanan', href: '' }];
 
-export default function PasienIndexDokter() {
-    const { pasien } = usePage<PageProps>().props;
-    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+export default function CatatanLayananIndexDokter() {
+    const { catatan } = usePage<PageProps>().props;
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredPasien = pasien.filter(
-        (p) =>
-            p.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.nik.includes(searchQuery),
+    const filteredCatatanLayanan = catatan.filter(
+        (c) =>
+            c.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.nomor_pasien.includes(searchQuery),
     );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Daftar Pasien" />
+            <Head title="Daftar Catatan Layanan" />
 
             <div className="p-6">
                 {/* Header */}
                 <div>
                     <h1 className="text-2xl font-semibold text-gray-900">
-                        Daftar Pasien
+                        Daftar Catatan Layanan
                     </h1>
                     <p className="mt-1 text-sm text-gray-500">
-                        Kelola data pasien yang Anda daftarkan
+                        Data pasien yang telah Anda tangani
                     </p>
                 </div>
 
@@ -69,15 +63,14 @@ export default function PasienIndexDokter() {
                             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Cari pasien berdasarkan nama atau NIK..."
+                                placeholder="Cari berdasarkan nama atau nomor pasien..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full min-w-[400px] rounded-lg border border-gray-200 bg-white py-2.5 pr-4 pl-10 text-sm text-gray-900 placeholder-gray-400 transition focus:border-emerald-400 focus:ring-emerald-400"
                             />
                         </div>
                         <button className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-                            <Filter className="h-4 w-4" />
-                            Filter
+                            <Filter className="h-4 w-4" /> Filter
                         </button>
                     </div>
                 </div>
@@ -102,8 +95,8 @@ export default function PasienIndexDokter() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {filteredPasien.length > 0 ? (
-                                    filteredPasien.map((item) => (
+                                {filteredCatatanLayanan.length > 0 ? (
+                                    filteredCatatanLayanan.map((item) => (
                                         <tr
                                             key={item.id}
                                             className="transition hover:bg-gray-50"
@@ -111,42 +104,24 @@ export default function PasienIndexDokter() {
                                             <td className="px-6 py-4 font-medium text-gray-900">
                                                 {item.nomor_pasien}
                                             </td>
-                                            <td className="px-6 py-4 font-medium text-gray-900">
+                                            <td className="px-6 py-4 text-gray-700">
                                                 {item.nama_lengkap}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {item.nik}
+                                                {item.keluhan_utama || '-'}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {item.jenis_kelamin === 'L'
-                                                    ? 'Laki-laki'
-                                                    : 'Perempuan'}
+                                                {item.diagnosa || '-'}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {item.tanggal_lahir
-                                                    ? new Date(
-                                                          item.tanggal_lahir,
-                                                      ).toLocaleDateString(
-                                                          'id-ID',
-                                                          {
-                                                              day: '2-digit',
-                                                              month: 'long',
-                                                              year: 'numeric',
-                                                          },
-                                                      )
-                                                    : '-'}
+                                                {item.tindakan || '-'}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {item.umur
-                                                    ? `${item.umur} tahun`
-                                                    : '-'}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-700">
-                                                {item.alamat}
+                                                {item.tanggal_ditangani}
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <Link
-                                                    href={`/dokter/pasien/${item.id}`}
+                                                    href={`/dokter/catatan-layanan/${item.id}`}
                                                     className="text-blue-600 hover:text-blue-700"
                                                 >
                                                     Lihat Detail
@@ -157,10 +132,10 @@ export default function PasienIndexDokter() {
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={listTable.length + 2}
+                                            colSpan={listTable.length + 1}
                                             className="px-6 py-10 text-center text-sm text-gray-500"
                                         >
-                                            Tidak ada data pasien.
+                                            Tidak ada data catatan layanan.
                                         </td>
                                     </tr>
                                 )}
@@ -172,8 +147,8 @@ export default function PasienIndexDokter() {
                 {/* Footer */}
                 <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
                     <p>
-                        Menampilkan {filteredPasien.length} dari {pasien.length}{' '}
-                        pasien
+                        Menampilkan {filteredCatatanLayanan.length} dari{' '}
+                        {catatan.length} pasien
                     </p>
                 </div>
             </div>
