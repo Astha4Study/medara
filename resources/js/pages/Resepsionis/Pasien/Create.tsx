@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { toast } from 'sonner';
 
 export default function PasienCreateResepsionis() {
     const { data, setData, processing, post, reset, errors } = useForm({
@@ -34,7 +35,17 @@ export default function PasienCreateResepsionis() {
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/resepsionis/pasien', {
-            onSuccess: () => reset(),
+            onSuccess: () => {
+                reset();
+                toast.success('Berhasil!', {
+                    description: 'Data pasien berhasil ditambahkan.',
+                });
+            },
+            onError: () => {
+                toast.error('Gagal!', {
+                    description: 'Terjadi kesalahan saat menambahkan pasien.',
+                });
+            },
         });
     };
 

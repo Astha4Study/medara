@@ -7,13 +7,14 @@ use App\Http\Controllers\AdminPengaturanController;
 use App\Http\Controllers\AdminPengaturanKlinikController;
 use App\Http\Controllers\ApotekerKlinikController;
 use App\Http\Controllers\ApotekerObatController;
+use App\Http\Controllers\ApotekerResepController;
+use App\Http\Controllers\ApotekerResepMasukController;
 use App\Http\Controllers\DokterAntrianController;
 use App\Http\Controllers\DokterCatatanLayananController;
 use App\Http\Controllers\DokterFinalStoreController;
 use App\Http\Controllers\DokterKlinikController;
 use App\Http\Controllers\DokterPasienController;
 use App\Http\Controllers\DokterResepController;
-use App\Http\Controllers\DokterStoreFinalController;
 use App\Http\Controllers\DokterTanganiController;
 use App\Http\Controllers\ResepsionisAntrianController;
 use App\Http\Controllers\ResepsionisKlinikController;
@@ -24,10 +25,10 @@ use App\Http\Controllers\SuperAdminPasienController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn() => Inertia::render('welcome'))->name('home');
+Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', fn() => Inertia::render('dashboard'))->name('dashboard');
+    Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
 
     Route::middleware(['auth', 'role:super_admin'])
         ->prefix('super-admin')
@@ -115,8 +116,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->parameters(['daftar-obat' => 'obat'])
                 ->names('daftarobat')
                 ->only(['index', 'show', 'create', 'store', 'edit', 'update', 'destroy']);
+            Route::resource('resep-masuk', ApotekerResepMasukController::class)
+                ->only('index', 'edit', 'update')
+                ->parameters(['resep-masuk' => 'resep']);
+            Route::put('resep-masuk/{resep}/mulai', [ApotekerResepController::class, 'update'])
+                ->name('resep-masuk.mulai');
         });
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

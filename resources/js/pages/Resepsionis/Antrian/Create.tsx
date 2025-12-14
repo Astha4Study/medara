@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
+import { toast } from 'sonner';
 
 interface Pasien {
     id: number;
@@ -36,7 +37,17 @@ export default function AntrianCreateResepsionis({ pasien }: CreateProps) {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         post('/resepsionis/antrian', {
-            onSuccess: () => reset(),
+            onSuccess: () => {
+                reset();
+                toast.success('Berhasil!', {
+                    description: 'Antrian pasien berhasil dibuat.',
+                });
+            },
+            onError: () => {
+                toast.error('Gagal!', {
+                    description: 'Terjadi kesalahan saat membuat antrian.',
+                });
+            },
         });
     };
 

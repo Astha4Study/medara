@@ -2,6 +2,7 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import ClockIndicator from './clock-indicator';
+import FullScreenMode from './fullscreen-mode';
 
 export function AppSidebarHeader({
     breadcrumbs = [],
@@ -14,6 +15,7 @@ export function AppSidebarHeader({
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
+            <FullScreenMode />
             <ClockIndicator />
         </header>
     );

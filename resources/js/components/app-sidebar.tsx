@@ -64,6 +64,11 @@ export function AppSidebar() {
             icon: ClipboardList,
         },
         { title: 'Pembayaran', href: `${prefix}/pembayaran`, icon: CreditCard },
+        {
+            title: 'Resep Masuk',
+            href: `${prefix}/resep-masuk`,
+            icon: ClipboardList,
+        },
     ];
 
     const allFooterNavItems: NavItem[] = [
@@ -113,7 +118,7 @@ export function AppSidebar() {
             footer: [],
         },
         apoteker: {
-            main: ['Dashboard', 'Klinik', 'Daftar Obat'],
+            main: ['Dashboard', 'Klinik', 'Daftar Obat', 'Resep Masuk'],
             footer: [],
         },
     };

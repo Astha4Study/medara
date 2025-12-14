@@ -5,6 +5,7 @@ import { useResepStore } from '@/stores/resep.store';
 import { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 import { route } from 'ziggy-js';
 
 type Props = {
@@ -42,7 +43,16 @@ export default function ResepCreateDokter({ pasien, obat_list }: Props) {
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    router.visit('/dokter/pasien');
+                    toast.success('Berhasil!', {
+                        description: 'Resep pasien berhasil disimpan.',
+                    });
+                    router.visit('/dokter/antrian');
+                },
+                onError: () => {
+                    toast.error('Gagal!', {
+                        description:
+                            'Terjadi kesalahan saat menyimpan resep pasien.',
+                    });
                 },
             },
         );

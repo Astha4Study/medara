@@ -41,7 +41,7 @@ class Resep extends Model
         return $this->belongsTo(User::class, 'apoteker_id');
     }
 
-    public function detail()
+    public function resepDetail()
     {
         return $this->hasMany(ResepDetail::class, 'resep_id');
     }

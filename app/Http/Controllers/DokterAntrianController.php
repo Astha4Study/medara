@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Antrian;
-use App\Models\CatatanLayanan;
 use App\Models\Dokter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,8 +19,8 @@ class DokterAntrianController extends Controller
 
         $dokter = $user->dokter;
 
-        if (!$dokter) {
-            abort(404, "Data dokter tidak ditemukan");
+        if (! $dokter) {
+            abort(404, 'Data dokter tidak ditemukan');
         }
 
         $antrian = Antrian::with(['pasien:id,nomor_pasien,nama_lengkap'])
@@ -44,7 +43,6 @@ class DokterAntrianController extends Controller
             'antrian' => $antrian,
         ]);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -101,8 +99,9 @@ class DokterAntrianController extends Controller
             ->first();
 
         if ($sedang) {
-            return redirect()->route('dokter.antrian.index')
-                ->with('error', 'Anda sudah menangani pasien lain. Selesaikan dulu sebelum menangani pasien baru.');
+            return back()->withErrors([
+                'message' => 'Anda sudah menangani pasien lain. Selesaikan dulu sebelum menangani pasien baru.',
+            ]);
         }
 
         // Kalau belum ada pasien aktif, update status
@@ -113,6 +112,44 @@ class DokterAntrianController extends Controller
         return redirect()->route('dokter.tangani.create', $antrian->id)
             ->with('success', 'Status antrian berhasil diperbarui menjadi Sedang diperiksa.');
     }
+
+    //     public function update(Request $request, string $id)
+    // {
+    //     $user = Auth::user();
+    //     $dokter = Dokter::where('user_id', $user->id)->firstOrFail();
+
+    //     $antrian = Antrian::findOrFail($id);
+
+    //     // Kalau dokter klik antrian yang sama
+    //     if (
+    //         $antrian->status === 'Sedang diperiksa' &&
+    //         $antrian->dokter_id === $dokter->id
+    //     ) {
+    //         return redirect()
+    //             ->route('dokter.tangani.create', $antrian->id);
+    //     }
+
+    //     // Cek apakah masih menangani pasien lain
+    //     $sedang = Antrian::where('dokter_id', $dokter->id)
+    //         ->where('status', 'Sedang diperiksa')
+    //         ->where('id', '!=', $antrian->id)
+    //         ->first();
+
+    //     if ($sedang) {
+    //         return back()->withErrors([
+    //             'message' =>
+    //                 'Anda masih menangani pasien lain. Selesaikan terlebih dahulu.',
+    //         ]);
+    //     }
+
+    //     // Klaim antrian
+    //     $antrian->update([
+    //         'status' => 'Sedang diperiksa',
+    //         'dokter_id' => $dokter->id,
+    //     ]);
+
+    //     return redirect()->route('dokter.tangani.create', $antrian->id);
+    // }
 
     /**
      * Remove the specified resource from storage.

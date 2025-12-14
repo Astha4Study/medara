@@ -2,6 +2,7 @@ import FormEditPasienResepsionis from '@/components/form-edit-pasien-resepsionis
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 type Pasien = {
     id: number;
@@ -52,10 +53,15 @@ export default function PasienEditResepsionis({ pasien }: Props) {
 
         router.post(`/resepsionis/pasien/${pasien.id}?_method=PUT`, formData, {
             onSuccess: () => {
-                console.log('✅ Data pasien berhasil diperbarui');
+                toast.success('Berhasil!', {
+                    description: 'Data pasien berhasil diperbarui.',
+                });
             },
-            onError: (err) => {
-                console.error('❌ Error:', err);
+            onError: () => {
+                toast.error('Gagal!', {
+                    description:
+                        'Terjadi kesalahan saat memperbarui data pasien.',
+                });
             },
         });
     };

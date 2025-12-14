@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { route } from 'ziggy-js';
 
 type Antrian = {
@@ -140,6 +141,17 @@ export default function AntrianIndexDokter() {
                                                     )}
                                                     method="put"
                                                     as="button"
+                                                    onSuccess={() =>
+                                                        toast.success(
+                                                            'Pasien berhasil ditangani.',
+                                                        )
+                                                    }
+                                                    onError={(errors) =>
+                                                        toast.error(
+                                                            errors?.message ??
+                                                                'Anda masih menangani pasien lain.',
+                                                        )
+                                                    }
                                                     className="rounded-md bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
                                                 >
                                                     Tangani
