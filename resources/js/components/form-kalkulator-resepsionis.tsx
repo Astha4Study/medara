@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 type Props = {
     totalHarga: number;
@@ -49,7 +49,7 @@ export default function FormKalkulatorResepsionis({
     return (
         <form
             onSubmit={handleSubmit}
-            className="rounded-2xl border border-gray-200 bg-white shadow-sm"
+            className="rounded-xl border border-gray-200 bg-white shadow-sm"
         >
             <div className="space-y-4 p-6">
                 <h3 className="text-base font-semibold text-gray-800">
@@ -117,7 +117,7 @@ export default function FormKalkulatorResepsionis({
                 </div>
             </div>
 
-            <div className="flex justify-end border-t bg-gray-50 px-6 py-4">
+            <div className="flex justify-end rounded-b-xl border-t bg-gray-50 px-6 py-4">
                 <button
                     type="submit"
                     disabled={processing || kembalian < 0}

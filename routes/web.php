@@ -27,10 +27,10 @@ use App\Http\Controllers\SuperAdminPasienController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('welcome'))->name('home');
+Route::get('/', fn() => Inertia::render('welcome'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
+    Route::get('dashboard', fn() => Inertia::render('dashboard'))->name('dashboard');
 
     Route::middleware(['auth', 'role:super_admin'])
         ->prefix('super-admin')
@@ -132,10 +132,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('penyerahan-obat', ApotekerPenyerahanObatController::class)
                 ->parameters(['penyerahan-obat' => 'serahkan'])
                 ->only('index');
-            Route::get('penyerahan-obat/{serahkan}/serahkan', [ApotekerPenyerahanObatController::class, 'create'])
-                ->name('penyerahan-obat.create');
+            Route::get('penyerahan-obat/{resep}/serahkan', [ApotekerPenyerahanObatController::class, 'edit'])
+                ->name('penyerahan-obat.edit');
+            Route::patch('penyerahan-obat/{resep}', [ApotekerPenyerahanObatController::class, 'update'])
+                ->name('penyerahan-obat.update');
         });
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

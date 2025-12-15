@@ -93,6 +93,7 @@ const FormCreateObatApoteker: React.FC<FormCreateObatApotekerProps> = ({
                         >
                             <option value="">Pilih jenis obat</option>
                             <option value="tablet">Tablet</option>
+                            <option value="sachet">Sachet</option>
                             <option value="kapsul">Kapsul</option>
                             <option value="sirup">Sirup</option>
                             <option value="injeksi">Injeksi</option>
@@ -119,6 +120,7 @@ const FormCreateObatApoteker: React.FC<FormCreateObatApotekerProps> = ({
                             <option value="">Pilih satuan</option>
                             <option value="strip">Strip</option>
                             <option value="box">Box</option>
+                            <option value="sachet">Sachet</option>
                             <option value="botol">Botol</option>
                             <option value="ampul">Ampul</option>
                             <option value="tube">Tube</option>

@@ -15,31 +15,30 @@ class ResepsionisPembayaranController extends Controller
      */
     public function index()
     {
-        $reseps = Resep::with([
-            'pasien:id,nama_lengkap,nomor_pasien',
-            'dokter:id,name', // kalau nama dokter ada di tabel users
-            'pembayaran:id,resep_id,status',
+        $pembayarans = Pembayaran::with([
+            'resep.pasien:id,nama_lengkap,nomor_pasien',
+            'resep.dokter:id,name',
         ])
-            ->where('status', 'selesai') // ✅ hanya resep selesai
+            ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($resep) {
+            ->map(function ($pembayaran) {
+                $resep = $pembayaran->resep;
+
                 return [
-                    'id' => $resep->id,
-                    'nomor_resep' => 'RSP-'.str_pad($resep->id, 6, '0', STR_PAD_LEFT),
+                    'id' => $pembayaran->id,
+                    'nomor_resep' => 'RSP-' . str_pad($resep->id, 6, '0', STR_PAD_LEFT),
                     'nomor_pasien' => $resep->pasien->nomor_pasien ?? '-',
                     'pasien_nama' => $resep->pasien->nama_lengkap ?? '-',
-                    'dokter_nama' => $resep->dokter->name ?? '-', // ambil nama dokter dari relasi user
+                    'dokter_nama' => $resep->dokter->name ?? '-',
                     'total_harga' => $resep->total_harga,
-                    'status_pembayaran' => $resep->pembayaran->status ?? 'belum_bayar', // ✅ status pembayaran
-                    'tanggal' => $resep->created_at->format('d F Y'),
+                    'status_pembayaran' => $pembayaran->status,
+                    'tanggal' => $pembayaran->created_at->format('d F Y'),
                 ];
             });
 
-        // dd($reseps);
-
         return Inertia::render('Resepsionis/Pembayaran/Index', [
-            'reseps' => $reseps,
+            'reseps' => $pembayarans,
         ]);
     }
 
@@ -61,7 +60,7 @@ class ResepsionisPembayaranController extends Controller
                 'id' => $resep->id,
                 'total_harga' => $resep->total_harga,
                 'status' => $resep->status ?? 'belum_bayar',
-                      'diagnosa' => optional($resep->catatanLayanan)->diagnosa ?? '-',
+                'diagnosa' => optional($resep->catatanLayanan)->diagnosa ?? '-',
                 'pasien' => [
                     'nama_lengkap' => $resep->pasien->nama_lengkap,
                     'nomor_pasien' => $resep->pasien->nomor_pasien,
@@ -71,7 +70,7 @@ class ResepsionisPembayaranController extends Controller
                 'dokter' => [
                     'nama' => $resep->dokter->name ?? '-',
                 ],
-                'detail' => $resep->resepDetail->map(fn ($d) => [
+                'detail' => $resep->resepDetail->map(fn($d) => [
                     'id' => $d->id,
                     'nama_obat' => $d->obat->nama_obat ?? '-',
                     'jumlah' => $d->jumlah,
@@ -131,7 +130,7 @@ class ResepsionisPembayaranController extends Controller
                 ->route('resepsionis.pembayaran.index')
                 ->with(
                     'success',
-                    'Pembayaran berhasil. Kembalian: Rp '.
+                    'Pembayaran berhasil. Kembalian: Rp ' .
                     number_format($kembalian, 0, ',', '.')
                 );
         });

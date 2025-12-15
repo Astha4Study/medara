@@ -27,14 +27,9 @@ export default function ResepCreateDokter({ pasien, obat_list }: Props) {
         resetResep();
     }, []);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const url = route('dokter.resep.store-final');
-        console.log(url);
-
+    const handleSubmit = () => {
         router.post(
-            url,
+            route('dokter.resep.store-final'),
             {
                 catatan,
                 obat: resepObat,
@@ -85,9 +80,9 @@ export default function ResepCreateDokter({ pasien, obat_list }: Props) {
                     <FormCreateResep
                         obat_list={obat_list}
                         pasien={pasien}
-                        onSubmit={handleSubmit}
                         processing={false}
                         errors={{}}
+                        onConfirm={handleSubmit}
                     />
                 </div>
             </div>

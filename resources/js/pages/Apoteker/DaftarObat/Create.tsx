@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { toast } from 'sonner';
 
 export default function DaftarObatCreateApoteker() {
     const { data, setData, processing, post, reset, errors } = useForm({
@@ -23,7 +24,13 @@ export default function DaftarObatCreateApoteker() {
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/apoteker/daftar-obat', {
-            onSuccess: () => reset(),
+            onSuccess: () => {
+                toast.success('Obat berhasil ditambahkan');
+                reset();
+            },
+            onError: () => {
+                toast.error('Gagal menambahkan obat, periksa kembali formulir');
+            },
         });
     };
 

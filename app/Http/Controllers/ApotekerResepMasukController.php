@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pembayaran;
 use App\Models\Resep;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class ApotekerResepMasukController extends Controller
             ->whereIn('status', ['pending', 'sedang_dibuat'])
             ->orderBy('created_at', 'asc')
             ->get()
-            ->map(fn ($item) => [
+            ->map(fn($item) => [
                 'id' => $item->id,
                 'pasien_nama' => $item->pasien->nama_lengkap,
                 'nomor_pasien' => $item->pasien->nomor_pasien,
@@ -94,7 +95,7 @@ class ApotekerResepMasukController extends Controller
 
                 'diagnosa' => $resep->catatanLayanan->diagnosa ?? '-',
 
-                'detail' => $resep->resepDetail->map(fn ($d) => [
+                'detail' => $resep->resepDetail->map(fn($d) => [
                     'id' => $d->id,
                     'nama_obat' => $d->obat->nama_obat,
                     'jumlah' => $d->jumlah,
@@ -113,14 +114,28 @@ class ApotekerResepMasukController extends Controller
     {
         $resep = Resep::findOrFail($id);
 
+        // update resep
         $resep->update([
             'status' => 'selesai',
             'apoteker_id' => Auth::id(),
         ]);
 
+        if ($resep->pembayaran) {
+            $resep->pembayaran()->update([
+                'status' => 'pending',
+            ]);
+        } else {
+            Pembayaran::create([
+                'resep_id' => $resep->id,
+                'resepsionis_id' => auth()->id(),
+                'total_bayar' => $resep->total_harga,
+                'status' => 'pending',
+            ]);
+        }
+
         return redirect()
             ->route('apoteker.resep-masuk.index')
-            ->with('success', 'Resep berhasil disiapkan');
+            ->with('success', 'Resep berhasil disiapkan dan pembayaran menunggu.');
     }
 
     /**

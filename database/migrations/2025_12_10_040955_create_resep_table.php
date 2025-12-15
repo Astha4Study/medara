@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->foreignId('klinik_id')->constrained('klinik')->onDelete('cascade');
             $table->foreignId('dokter_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('apoteker_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->enum('status', ['pending', 'diproses', 'selesai'])->default('pending');
+            $table->enum('status', ['pending', 'sedang_dibuat', 'selesai'])->default('pending');
             $table->timestamps();
         });
     }

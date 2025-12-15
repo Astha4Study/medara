@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react'; 
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 type ResepPembayaran = {
@@ -18,6 +18,7 @@ type PageProps = {
 };
 
 const listTable = [
+    'No',
     'Nomor Pasien',
     'Nama Pasien',
     'Dokter',
@@ -32,9 +33,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const statusBadge: Record<
-    ResepPembayaran['status_pembayaran'],
+    ResepPembayaran['status_pembayaran'] | 'pending',
     { label: string; className: string }
 > = {
+    pending: {
+        label: 'Menunggu Pembayaran',
+        className: 'bg-blue-100 text-blue-700',
+    },
     belum_bayar: {
         label: 'Belum Dibayar',
         className: 'bg-yellow-100 text-yellow-700',
@@ -51,7 +56,7 @@ export default function PembayaranIndexResepsionis() {
 
     const filtered = reseps.filter(
         (r) =>
-            r.status_pembayaran === 'belum_bayar' &&
+            ['pending', 'belum_bayar', 'lunas'].includes(r.status_pembayaran) &&
             (r.pasien_nama.toLowerCase().includes(search.toLowerCase()) ||
                 r.nomor_pasien.toLowerCase().includes(search.toLowerCase())),
     );
@@ -96,11 +101,14 @@ export default function PembayaranIndexResepsionis() {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {filtered.length > 0 ? (
-                                    filtered.map((item) => (
+                                    filtered.map((item, index) => (
                                         <tr
                                             key={item.id}
                                             className="transition hover:bg-gray-50"
                                         >
+                                            <td className="px-6 py-4 font-medium text-gray-900">
+                                                {index + 1}
+                                            </td>
                                             <td className="px-6 py-4 font-medium text-gray-900">
                                                 {item.nomor_pasien}
                                             </td>
@@ -135,8 +143,12 @@ export default function PembayaranIndexResepsionis() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {item.status_pembayaran ===
-                                                'belum_bayar' ? (
+                                                {[
+                                                    'pending',
+                                                    'belum_bayar',
+                                                ].includes(
+                                                    item.status_pembayaran,
+                                                ) ? (
                                                     <Link
                                                         href={`/resepsionis/pembayaran/${item.id}/proses-bayar`}
                                                         className="rounded-md bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"

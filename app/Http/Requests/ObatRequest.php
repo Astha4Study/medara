@@ -23,8 +23,8 @@ class ObatRequest extends FormRequest
     {
         return [
             'nama_obat' => 'required|string|max:100',
-            'jenis_obat' => 'required|in:tablet,kapsul,sirup,injeksi,salep',
-            'satuan' => 'required|in:strip,box,botol,ampul,tube',
+            'jenis_obat' => 'required|in:tablet,kapsul,sachet,sirup,injeksi,salep',
+            'satuan' => 'required|in:strip,sachet,box,botol,ampul,tube',
             'stok' => 'required|integer|min:0',
             'harga' => 'required|integer|min:0',
             'penggunaan_obat' => 'required|string|max:2000',

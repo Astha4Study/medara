@@ -6,6 +6,7 @@ import { useState } from 'react';
 type Antrian = {
     id: number;
     nomor_antrian: number;
+    nomor_pasien: string;
     pasien_nama: string;
     dokter_nama: string;
     keluhan: string;
@@ -19,6 +20,7 @@ type PageProps = {
 
 const listTable = [
     'No Antrian',
+    'Nomor Pasien',
     'Nama Pasien',
     'Nama Dokter',
     'Keluhan',
@@ -36,9 +38,12 @@ export default function AntrianIndexResepsionis() {
 
     const filteredAntrian = antrian.filter(
         (a) =>
-            a.pasien_nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            a.dokter_nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            a.keluhan.toLowerCase().includes(searchQuery.toLowerCase()),
+            (a.pasien_nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                a.dokter_nama
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                a.keluhan.toLowerCase().includes(searchQuery.toLowerCase())) &&
+            a.status.toLowerCase() !== 'selesai',
     );
 
     return (
@@ -79,8 +84,11 @@ export default function AntrianIndexResepsionis() {
                                             key={item.id}
                                             className="transition hover:bg-gray-50"
                                         >
-                                            <td className="px-6 py-4 font-medium text-gray-900">
+                                            <td className="px-6 py-4 text-gray-700">
                                                 {item.nomor_antrian ?? '-'}
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-gray-900">
+                                                {item.nomor_pasien ?? '-'}
                                             </td>
                                             <td className="px-6 py-4 font-medium text-gray-900">
                                                 {item.pasien_nama
