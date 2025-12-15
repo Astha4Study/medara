@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { toast } from 'sonner';
 
 export default function AdminsCreateSuperAdmin() {
     const { data, setData, post, processing, reset } = useForm({
@@ -14,9 +15,20 @@ export default function AdminsCreateSuperAdmin() {
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
+
+        if (!data.name.trim() || !data.email.trim()) {
+            toast.error('Nama & email wajib diisi');
+            return;
+        }
+
         post('/super-admin/kelola-admin', {
             onSuccess: () => {
                 reset();
+                toast.success('Admin berhasil ditambahkan!');
+            },
+            onError: (errs) => {
+                const msg = Object.values(errs as Record<string, string>)[0];
+                toast.error(msg || 'Gagal menambahkan admin');
             },
         });
     };
@@ -45,7 +57,7 @@ export default function AdminsCreateSuperAdmin() {
                             setData={setData}
                             handleSubmit={handleSubmit}
                             processing={processing}
-                            availableRoles={['admin']} // ✅ hanya admin
+                            availableRoles={['admin']}
                         />
                     </div>
                 </div>

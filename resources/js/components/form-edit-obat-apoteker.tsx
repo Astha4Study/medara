@@ -1,38 +1,29 @@
 import { Link } from '@inertiajs/react';
-import React from 'react';
 
-interface FormCreateObatProps {
+interface FormEditObatApotekerProps {
     data: any;
-    setData: (key: string, value: any) => void;
+    setData: (k: string, v: any) => void;
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-    handleChange: (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >,
-    ) => void;
     processing: boolean;
     errors: Record<string, string>;
 }
 
-const FormCreateObat: React.FC<FormCreateObatProps> = ({
+export default function FormEditObatApoteker({
     data,
     setData,
     handleSubmit,
-    handleChange,
     processing,
     errors,
-}) => {
-    const formatRupiah = (value: string | number) => {
-        if (!value) return '';
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(Number(value));
+}: FormEditObatApotekerProps) {
+    const formatRupiah = (v: string | number) => {
+        const num = Number(v);
+        if (Number.isNaN(num)) return '';
+        return num === 0 ? '' : `Rp${num.toLocaleString('id-ID')}`;
     };
 
-    const parseRupiah = (value: string) => {
-        return Number(value.replace(/[^0-9]/g, ''));
+    const parseRupiah = (v: string) => {
+        const raw = v.replace(/[^0-9]/g, '');
+        return raw === '' ? 0 : Number(raw);
     };
 
     return (
@@ -48,7 +39,9 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
                             type="text"
                             name="nama_obat"
                             value={data.nama_obat}
-                            onChange={handleChange}
+                            onChange={(e) =>
+                                setData('nama_obat', e.target.value)
+                            }
                             className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
                             placeholder="Masukkan nama obat"
                         />
@@ -68,7 +61,7 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
                             type="number"
                             name="stok"
                             value={data.stok}
-                            onChange={handleChange}
+                            onChange={(e) => setData('stok', e.target.value)}
                             className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
                         />
                         {errors.stok && (
@@ -86,10 +79,11 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
                         <select
                             name="jenis_obat"
                             value={data.jenis_obat}
-                            onChange={handleChange}
+                            onChange={(e) =>
+                                setData('jenis_obat', e.target.value)
+                            }
                             className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
                         >
-                            <option value="">Pilih jenis obat</option>
                             <option value="tablet">Tablet</option>
                             <option value="kapsul">Kapsul</option>
                             <option value="sirup">Sirup</option>
@@ -111,10 +105,9 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
                         <select
                             name="satuan"
                             value={data.satuan}
-                            onChange={handleChange}
+                            onChange={(e) => setData('satuan', e.target.value)}
                             className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
                         >
-                            <option value="">Pilih satuan</option>
                             <option value="strip">Strip</option>
                             <option value="box">Box</option>
                             <option value="botol">Botol</option>
@@ -129,20 +122,26 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
                     </div>
 
                     {/* Harga */}
-                    <div>
+                    <div className="md:col-span-2">
                         <label className="mb-2 block text-sm font-medium text-gray-700">
                             Harga <span className="text-red-500">*</span>
                         </label>
+
+                        {/* Input visual (Rp 20.000) */}
                         <input
                             type="text"
-                            name="harga"
                             value={formatRupiah(data.harga)}
-                            onChange={(e) =>
-                                setData('harga', parseRupiah(e.target.value))
-                            }
+                            onChange={(e) => {
+                                const raw = parseRupiah(e.target.value);
+                                setData('harga', raw); // simpan angka murni
+                            }}
                             className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
                             placeholder="Contoh: Rp 50.000"
                         />
+
+                        {/* Hidden input untuk memastikan data asli tetap number */}
+                        <input type="hidden" name="harga" value={data.harga} />
+
                         {errors.harga && (
                             <p className="mt-1 text-sm text-red-600">
                                 {errors.harga}
@@ -159,7 +158,10 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
                     <textarea
                         name="penggunaan_obat"
                         value={data.penggunaan_obat}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                            setData('penggunaan_obat', e.target.value)
+                        }
+                        rows={4}
                         className="h-28 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
                         placeholder="Cara pakai & kegunaan obat"
                     />
@@ -171,7 +173,7 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
                 </div>
             </div>
 
-            {/* Tombol */}
+            {/* Footer */}
             <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
                 <Link
                     href="/apoteker/daftar-obat"
@@ -184,11 +186,9 @@ const FormCreateObat: React.FC<FormCreateObatProps> = ({
                     disabled={processing}
                     className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                 >
-                    {processing ? 'Menyimpan...' : 'Simpan'}
+                    {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </button>
             </div>
         </form>
     );
-};
-
-export default FormCreateObat;
+}

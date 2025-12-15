@@ -18,14 +18,26 @@ class DokterCatatanLayananController extends Controller
         $user = Auth::user();
         $dokter = $user->dokter;
 
-        if (!$dokter) {
-            abort(404, "Data dokter tidak ditemukan");
+        if (! $dokter) {
+            abort(404, 'Data dokter tidak ditemukan');
         }
 
         $catatan = CatatanLayanan::with(['pasien', 'antrian'])
-            ->where('dokter_id', $dokter->id)
-            ->orderBy('tanggal_kunjungan', 'desc')
-            ->get();
+            ->where('dokter_id', $dokter->id) // gunakan $dokter->id, bukan $user->id
+            ->where('klinik_id', $user->klinik_id)
+            ->latest('updated_at')
+            ->get()
+            ->map(fn ($c) => [
+                'id' => $c->id,
+                'nomor_pasien' => $c->pasien?->nomor_pasien ?? '',
+                'nama_lengkap' => $c->pasien?->nama_lengkap ?? '',
+                'tanggal_kunjungan' => $c->tanggal_kunjungan,
+                'keluhan_utama' => $c->keluhan_utama,
+                'diagnosa' => $c->diagnosa,
+                'tindakan' => $c->tindakan,
+                'catatan_lain' => $c->catatan_lain,
+                'tanggal_ditangani' => $c->updated_at->format('d M Y'),
+            ]);
 
         return Inertia::render('Dokter/CatatanLayanan/Index', [
             'catatan' => $catatan,
@@ -37,20 +49,7 @@ class DokterCatatanLayananController extends Controller
      */
     public function create(Antrian $antrian)
     {
-        $dokter = Auth::user()->dokter;
-
-        if (!$dokter || $antrian->dokter_id !== $dokter->id) {
-            abort(404, "Antrian tidak ditemukan untuk dokter ini");
-        }
-
-        $antrian->load('pasien');
-
-        return Inertia::render('Dokter/Tangani/Create', [
-            'antrian' => $antrian,
-            'pasien' => $antrian->pasien,
-            'keluhan_utama' => $antrian->keluhan,
-            'punya_server' => $antrian->klinik->punya_server,
-        ]);
+        //
     }
 
     /**
@@ -101,13 +100,34 @@ class DokterCatatanLayananController extends Controller
     {
         $dokter = Auth::user()->dokter;
 
-        $tindakan = CatatanLayanan::with(['pasien', 'dokter'])
+        $catatan = CatatanLayanan::with(['pasien', 'dokter', 'antrian'])
             ->where('id', $id)
             ->where('dokter_id', $dokter->id)
             ->firstOrFail();
 
-        return Inertia::render('Dokter/catatan-layanan/Show', [
-            'tindakan' => $tindakan,
+        return Inertia::render('Dokter/CatatanLayanan/Show', [
+            'catatan' => [
+                'id' => $catatan->id,
+                'nomor_pasien' => $catatan->pasien?->nomor_pasien ?? '',
+                'nama_lengkap' => $catatan->pasien?->nama_lengkap ?? '',
+                'nik' => $catatan->pasien?->nik ?? '',
+                'jenis_kelamin' => $catatan->pasien?->jenis_kelamin ?? '',
+                'tanggal_lahir' => $catatan->pasien?->tanggal_lahir ?? '',
+                'tempat_lahir' => $catatan->pasien?->tempat_lahir ?? '',
+                'alamat' => $catatan->pasien?->alamat ?? '',
+                'no_hp' => $catatan->pasien?->no_hp ?? '',
+                'golongan_darah' => $catatan->pasien?->golongan_darah ?? '',
+                'riwayat_penyakit' => $catatan->pasien?->riwayat_penyakit ?? '',
+                'alergi' => $catatan->pasien?->alergi ?? '',
+                'tanggal_kunjungan' => $catatan->tanggal_kunjungan,
+                'keluhan_utama' => $catatan->keluhan_utama,
+                'detail_keluhan' => $catatan->detail_keluhan,
+                'diagnosa' => $catatan->diagnosa,
+                'tindakan' => $catatan->tindakan,
+                'catatan_lain' => $catatan->catatan_lain,
+                'dokter_nama' => $catatan->dokter?->user?->name ?? '',
+                'tanggal_ditangani' => $catatan->updated_at->format('d M Y'),
+            ],
         ]);
     }
 

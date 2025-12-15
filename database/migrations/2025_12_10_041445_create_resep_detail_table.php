@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('resep_id')->constrained('resep')->onDelete('cascade');
             $table->foreignId('obat_id')->constrained('obat')->onDelete('cascade');
             $table->integer('jumlah')->default(1);
-            $table->decimal('harga_satuan', 12, 2)->default(0);
+            $table->decimal('harga_satuan', 12, 2)->nullable();
             $table->timestamps();
         });
     }

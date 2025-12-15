@@ -80,15 +80,14 @@ class Pasien extends Model
             $tanggal = now()->format('Ymd');
 
             $last = self::where('klinik_id', $pasien->klinik_id)
-                ->whereDate('created_at', now()->toDateString())
-                ->orderBy('id', 'desc')
+                ->orderByRaw('CAST(SUBSTRING_INDEX(nomor_pasien, "-", -1) AS UNSIGNED) DESC')
                 ->first();
 
-            $next = $last
-                ? intval(substr($last->nomor_pasien, -4)) + 1
-                : 1;
+            $next = $last ? (int) substr($last->nomor_pasien, -4) + 1 : 1;
 
-            $pasien->nomor_pasien = "{$klinik->kode_klinik}-{$tanggal}-" . str_pad($next, 4, '0', STR_PAD_LEFT);
+            $pasien->nomor_pasien =
+                $klinik->kode_klinik . '-' . now()->format('Ymd') . '-' .
+                str_pad($next, 4, '0', STR_PAD_LEFT);
         });
     }
 }

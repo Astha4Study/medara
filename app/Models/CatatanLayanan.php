@@ -51,9 +51,4 @@ class CatatanLayanan extends Model
         return $this->belongsTo(Antrian::class, 'antrian_id');
     }
 
-    // public function resep()
-    // {
-    //     return $this->hasOne(Resep::class, 'catatan_layanan_id');
-    // }
-
 }

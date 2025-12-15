@@ -1,15 +1,14 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-
-type Pasien = {
-    nama_lengkap: string;
-};
+import { toast } from 'sonner';
+import { route } from 'ziggy-js';
 
 type Antrian = {
     id: number;
     nomor_antrian: number;
+    nomor_pasien: number | null;
     pasien_nama: string;
     keluhan: string | null;
     status: string;
@@ -21,7 +20,8 @@ type PageProps = {
 };
 
 const listTable = [
-    'No Antrian',
+    'No',
+    'No Pasien',
     'Nama Pasien',
     'Keluhan',
     'Tanggal Dibuat',
@@ -39,10 +39,13 @@ export default function AntrianIndexDokter() {
 
     const filteredAntrian = antrian.filter(
         (a) =>
-            (a.pasien_nama || '')
+            a.status !== 'Selesai' &&
+            ((a.pasien_nama || '')
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase()) ||
-            (a.keluhan || '').toLowerCase().includes(searchQuery.toLowerCase()),
+                (a.keluhan || '')
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase())),
     );
 
     return (
@@ -88,6 +91,10 @@ export default function AntrianIndexDokter() {
                                             </td>
 
                                             <td className="px-6 py-4 font-medium text-gray-900">
+                                                {item.nomor_pasien ?? '-'}
+                                            </td>
+
+                                            <td className="px-6 py-4 font-medium text-gray-900">
                                                 {item.pasien_nama ?? '-'}
                                             </td>
 
@@ -127,12 +134,28 @@ export default function AntrianIndexDokter() {
                                             </td>
 
                                             <td className="px-6 py-4 text-gray-700">
-                                                <a
-                                                    href={`/dokter/antrian/${item.id}/tangani`}
+                                                <Link
+                                                    href={route(
+                                                        'dokter.antrian.update',
+                                                        item.id,
+                                                    )}
+                                                    method="put"
+                                                    as="button"
+                                                    onSuccess={() =>
+                                                        toast.success(
+                                                            'Pasien berhasil ditangani.',
+                                                        )
+                                                    }
+                                                    onError={(errors) =>
+                                                        toast.error(
+                                                            errors?.message ??
+                                                                'Anda masih menangani pasien lain.',
+                                                        )
+                                                    }
                                                     className="rounded-md bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
                                                 >
                                                     Tangani
-                                                </a>
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))

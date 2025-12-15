@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,14 +17,14 @@ class SuperAdminAddAdminController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->hasRole('super_admin')) {
+        if (! $user->hasRole('super_admin')) {
             abort(403, 'Akses ditolak.');
         }
 
         $admins = User::role('admin')->get();
 
         return Inertia::render('SuperAdmin/Admins/Index', [
-            'admins' => $admins->map(fn($a) => [
+            'admins' => $admins->map(fn ($a) => [
                 'id' => $a->id,
                 'name' => $a->name,
                 'email' => $a->email,
@@ -39,7 +38,7 @@ class SuperAdminAddAdminController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->hasRole('super_admin')) {
+        if (! Auth::user()->hasRole('super_admin')) {
             abort(403, 'Akses ditolak.');
         }
 
@@ -53,7 +52,7 @@ class SuperAdminAddAdminController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->hasRole('super_admin')) {
+        if (! $user->hasRole('super_admin')) {
             abort(403, 'Akses ditolak.');
         }
 
@@ -72,7 +71,7 @@ class SuperAdminAddAdminController extends Controller
 
         $admin->assignRole('admin');
 
-        return redirect()->route('super_admin.admins.index')->with('success', 'Admin berhasil ditambahkan.');
+        return redirect()->route('super_admin.kelola-admin.index')->with('success', 'Admin berhasil ditambahkan.');
     }
 
     /**
@@ -80,7 +79,24 @@ class SuperAdminAddAdminController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $admin = User::findOrFail($id);
+
+        if (! Auth::user()->hasRole('super_admin')) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if (! $admin->hasRole('admin')) {
+            abort(403, 'Data bukan admin.');
+        }
+
+        return Inertia::render('SuperAdmin/Admins/Show', [
+            'admin' => [
+                'id' => $admin->id,
+                'name' => $admin->name,
+                'email' => $admin->email,
+                'created_at' => $admin->created_at->format('d M Y'),
+            ],
+        ]);
     }
 
     /**
@@ -90,11 +106,11 @@ class SuperAdminAddAdminController extends Controller
     {
         $admin = User::findOrFail($id);
 
-        if (!Auth::user()->hasRole('super_admin')) {
+        if (! Auth::user()->hasRole('super_admin')) {
             abort(403, 'Akses ditolak.');
         }
 
-        if (!$admin->hasRole('admin')) {
+        if (! $admin->hasRole('admin')) {
             abort(403, 'Hanya admin yang bisa diedit.');
         }
 
@@ -110,13 +126,13 @@ class SuperAdminAddAdminController extends Controller
     {
         $admin = User::findOrFail($id);
 
-        if (!Auth::user()->hasRole('super_admin')) {
+        if (! Auth::user()->hasRole('super_admin')) {
             abort(403, 'Akses ditolak.');
         }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
+            'email' => 'required|email|unique:users,email,'.$id,
             'password' => 'nullable|string|min:8',
         ]);
 
@@ -128,7 +144,7 @@ class SuperAdminAddAdminController extends Controller
                 : $admin->password,
         ]);
 
-        return redirect()->route('super_admin.admins.index')->with('success', 'Admin berhasil diperbarui.');
+        return redirect()->route('super_admin.kelola-admin.index')->with('success', 'Admin berhasil diperbarui.');
     }
 
     /**
@@ -138,16 +154,16 @@ class SuperAdminAddAdminController extends Controller
     {
         $admin = User::findOrFail($id);
 
-        if (!Auth::user()->hasRole('super_admin')) {
+        if (! Auth::user()->hasRole('super_admin')) {
             abort(403, 'Akses ditolak.');
         }
 
-        if (!$admin->hasRole('admin')) {
+        if (! $admin->hasRole('admin')) {
             abort(403, 'Hanya admin yang bisa dihapus.');
         }
 
         $admin->delete();
 
-        return redirect()->route('super_admin.admins.index')->with('success', 'Admin berhasil dihapus.');
+        return redirect()->route('super_admin.kelola-admin.index')->with('success', 'Admin berhasil dihapus.');
     }
 }

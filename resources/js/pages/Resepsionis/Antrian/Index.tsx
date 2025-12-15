@@ -1,6 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Inertia } from '@inertiajs/inertia';
 import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -33,32 +32,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function AntrianIndexResepsionis() {
     const { antrian } = usePage<PageProps>().props;
-    const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
-
-    const toggleSelect = (id: number) => {
-        setSelectedIds((prev) =>
-            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-        );
-    };
-
-    const toggleSelectAll = () => {
-        if (selectedIds.length === antrian.length) {
-            setSelectedIds([]);
-        } else {
-            setSelectedIds(antrian.map((a) => a.id));
-        }
-    };
-
-    const deleteSelected = () => {
-        if (selectedIds.length === 0) return;
-        if (confirm(`Yakin ingin menghapus ${selectedIds.length} antrian?`)) {
-            selectedIds.forEach((id) =>
-                Inertia.delete(`/resepsionis/antrian/${id}`),
-            );
-            setSelectedIds([]);
-        }
-    };
 
     const filteredAntrian = antrian.filter(
         (a) =>

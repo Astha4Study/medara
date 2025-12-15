@@ -13,9 +13,11 @@ return new class extends Migration {
         Schema::create('resep', function (Blueprint $table) {
             $table->id();
             $table->foreignId('catatan_layanan_id')->constrained('catatan_layanan')->onDelete('cascade');
-            $table->foreignId('apoteker_id')->nullable()->constrained('users')->onDelete('set null'); // apoteker
+            $table->foreignId('pasien_id')->constrained('pasien')->onDelete('cascade');
+            $table->foreignId('klinik_id')->constrained('klinik')->onDelete('cascade');
+            $table->foreignId('dokter_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('apoteker_id')->nullable()->constrained('users')->onDelete('set null');
             $table->enum('status', ['pending', 'diproses', 'selesai'])->default('pending');
-            $table->decimal('total_harga', 12, 2)->nullable();
             $table->timestamps();
         });
     }

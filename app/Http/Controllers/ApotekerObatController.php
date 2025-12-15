@@ -45,42 +45,54 @@ class ApotekerObatController extends Controller
             ...$request->validated(),
         ]);
 
-        return back()->with('success', 'Obat berhasil ditambahkan.');
+        return redirect()->route('apoteker.daftarobat.index')->with('success', 'Obat berhasil ditambahkan.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Obat $obat)
     {
-        //
+        if ($obat->klinik_id !== auth()->user()->klinik_id) {
+            abort(403);
+        }
+
+        return Inertia::render('Apoteker/DaftarObat/Show', [
+            'obat' => $obat
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Obat $daftar_obat)
+    public function edit(Obat $obat)
     {
         return Inertia::render('Apoteker/DaftarObat/Edit', [
-            'obat' => $daftar_obat
+            'obat' => $obat
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(ObatRequest $request, Obat $daftar_obat)
+    public function update(ObatRequest $request, Obat $obat)
     {
-        $daftar_obat->update($request->validated());
-        return back()->with('success', 'Obat berhasil diperbarui.');
+        $obat->update($request->validated());
+
+        return redirect()->route('apoteker.daftarobat.index')->with('success', 'Obat berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Obat $daftar_obat)
+    public function destroy(Obat $obat)
     {
-        $daftar_obat->delete();
+        if ($obat->klinik_id !== auth()->user()->klinik_id) {
+            abort(403);
+        }
+
+        $obat->delete();
+
         return back()->with('success', 'Obat berhasil dihapus.');
     }
 }

@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { toast } from 'sonner';
 
 export default function UsersCreateAdmin() {
     const { props } = usePage();
@@ -21,7 +22,15 @@ export default function UsersCreateAdmin() {
         e.preventDefault();
         post('/admin/tambah-user', {
             onSuccess: () => {
+                toast.success('User berhasil ditambahkan', {
+                    description: 'Data user baru telah disimpan ke sistem.',
+                });
                 reset();
+            },
+            onError: () => {
+                toast.error('Gagal menambahkan user', {
+                    description: 'Terjadi kesalahan saat menyimpan data user.',
+                });
             },
         });
     };

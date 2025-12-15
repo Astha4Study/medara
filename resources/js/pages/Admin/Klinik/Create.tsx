@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { ChangeEvent, FormEventHandler } from 'react';
+import { toast } from 'sonner';
 
 export default function KlinikCreateAdmin() {
     const { data, setData, post, processing, reset } = useForm({
@@ -34,7 +35,19 @@ export default function KlinikCreateAdmin() {
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/admin/klinik', {
-            onSuccess: () => reset(),
+            onSuccess: () => {
+                toast.success('Klinik berhasil dibuat', {
+                    description:
+                        'Data klinik baru telah ditambahkan ke sistem.',
+                });
+                reset();
+            },
+            onError: () => {
+                toast.error('Gagal membuat klinik', {
+                    description:
+                        'Terjadi kesalahan saat menyimpan data klinik.',
+                });
+            },
             forceFormData: true,
         });
     };

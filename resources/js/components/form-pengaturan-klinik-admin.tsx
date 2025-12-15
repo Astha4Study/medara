@@ -1,7 +1,8 @@
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { useState } from 'react';
 
-interface FormPengaturanAdminProps {
+interface FormPengaturanKlinikAdminProps {
     data: {
         punya_apoteker: boolean;
         punya_server: boolean;
@@ -12,15 +13,25 @@ interface FormPengaturanAdminProps {
     errors?: Record<string, string>;
 }
 
-const FormPengaturanAdmin: React.FC<FormPengaturanAdminProps> = ({
+const FormPengaturanKlinikAdmin: React.FC<FormPengaturanKlinikAdminProps> = ({
     data,
     setData,
     handleSubmit,
     processing,
     errors = {},
 }) => {
+    const [initialData] = useState(data);
+
+    const isChanged =
+        data.punya_apoteker !== initialData.punya_apoteker ||
+        data.punya_server !== initialData.punya_server;
+
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (!isChanged) {
+            alert('Data tidak berubah');
+            return;
+        }
         handleSubmit(e);
     };
 
@@ -87,7 +98,7 @@ const FormPengaturanAdmin: React.FC<FormPengaturanAdminProps> = ({
                 <div className="flex items-center justify-end">
                     <button
                         type="submit"
-                        disabled={processing}
+                        disabled={processing || !isChanged}
                         className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {processing ? 'Menyimpan...' : 'Simpan'}
@@ -98,4 +109,4 @@ const FormPengaturanAdmin: React.FC<FormPengaturanAdminProps> = ({
     );
 };
 
-export default FormPengaturanAdmin;
+export default FormPengaturanKlinikAdmin;

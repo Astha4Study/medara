@@ -28,27 +28,5 @@ class DatabaseSeeder extends Seeder
 
         $superAdmin->assignRole('super_admin');
 
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'admin',
-                'password' => Hash::make('12345678'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        $admin->assignRole('admin');
-
-        $pasien = User::firstOrCreate(
-            ['email' => 'iyandabes1@gmail.com'],
-            [
-                'name' => 'Astha',
-                'password' => Hash::make('12345678'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        $pasien->assignRole('pasien');
-
     }
 }

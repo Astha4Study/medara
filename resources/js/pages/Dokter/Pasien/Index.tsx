@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 type Pasien = {
     id: number;
+    nomor_pasien: string;
     nama_lengkap: string;
     nik: string;
     jenis_kelamin: 'L' | 'P';
@@ -24,6 +25,7 @@ type PageProps = {
 };
 
 const listTable = [
+    'Nomor Pasien',
     'Nama Pasien',
     'NIK',
     'Gender',
@@ -107,6 +109,9 @@ export default function PasienIndexDokter() {
                                             className="transition hover:bg-gray-50"
                                         >
                                             <td className="px-6 py-4 font-medium text-gray-900">
+                                                {item.nomor_pasien}
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-gray-900">
                                                 {item.nama_lengkap}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
@@ -141,10 +146,10 @@ export default function PasienIndexDokter() {
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <Link
-                                                    href={`/resepsionis/pasien/${item.id}/edit`}
-                                                    className="text-emerald-600 hover:text-emerald-700"
+                                                    href={`/dokter/pasien/${item.id}`}
+                                                    className="text-blue-600 hover:text-blue-700"
                                                 >
-                                                    Edit
+                                                    Lihat Detail
                                                 </Link>
                                             </td>
                                         </tr>

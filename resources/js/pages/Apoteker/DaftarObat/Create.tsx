@@ -1,4 +1,4 @@
-import FormCreateObat from '@/components/form-create-obat';
+import FormCreateObatApoteker from '@/components/form-create-obat-apoteker';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
@@ -47,7 +47,7 @@ export default function DaftarObatCreateApoteker() {
                 </div>
 
                 <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                    <FormCreateObat
+                    <FormCreateObatApoteker
                         data={data}
                         setData={setData}
                         handleSubmit={handleSubmit}

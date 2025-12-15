@@ -14,7 +14,12 @@ class AdminPengaturanController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+        $klinik = Klinik::where('created_by', $user->id)->first();
+
+        return Inertia::render('Admin/Pengaturan/Index', [
+        'klinik' => $klinik
+    ]);
     }
 
     /**
@@ -46,36 +51,15 @@ class AdminPengaturanController extends Controller
      */
     public function edit()
     {
-        $user = Auth::user();
-        $klinik = Klinik::where('created_by', $user->id)->firstOrFail();
-
-        return Inertia::render('Admin/Pengaturan/Page', [
-            'klinik' => $klinik->only(['id', 'punya_apoteker', 'punya_server']),
-        ]);
+        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request)
+    public function update(Request $request, string $id)
     {
-        $user = Auth::user();
-        $klinik = Klinik::where('created_by', $user->id)->firstOrFail();
-
-        $request->merge([
-            'punya_apoteker' => filter_var($request->punya_apoteker, FILTER_VALIDATE_BOOLEAN),
-            'punya_server' => filter_var($request->punya_server, FILTER_VALIDATE_BOOLEAN),
-        ]);
-
-        $validated = $request->validate([
-            'punya_apoteker' => 'required|boolean',
-            'punya_server' => 'required|boolean',
-        ]);
-
-        $klinik->update($validated);
-
-        return redirect()->route('admin.pengaturan.update')
-            ->with('success', 'Pengaturan berhasil disimpan.');
+        //
     }
 
     /**

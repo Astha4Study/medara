@@ -1,45 +1,61 @@
 import { Link } from '@inertiajs/react';
 import React from 'react';
 
-interface FormCreateCatatanLayananProps {
-    data: {
-        keluhan_utama: string;
-        detail_keluhan: string;
-        diagnosa: string;
-        tindakan: string;
-        catatan_lain: string;
-    };
-    setData: (key: string, value: any) => void;
+type Pasien = {
+    id: number;
+    nama_lengkap: string;
+    nomor_pasien?: string;
+    nik?: string | number;
+    tanggal_lahir?: string | null;
+    tempat_lahir?: string;
+    no_hp?: string | number;
+    golongan_darah?: string | null;
+    riwayat_penyakit?: string | null;
+    alergi?: string | null;
+};
+
+type Data = {
+    keluhan_utama: string;
+    detail_keluhan: string;
+    diagnosa: string;
+    tindakan: string;
+    catatan_lain: string;
+};
+
+interface Props {
+    pasien: Pasien;
+    punyaServer: number;
+    data: Data;
+    setData: (k: keyof Data, v: any) => void;
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     processing: boolean;
     errors: Record<string, string>;
-    pasien: {
-        nama_lengkap: string;
-        nomor_pasien: string;
-        nik: number;
-        tanggal_lahir: Date;
-        tempat_lahir: string;
-        no_hp: number;
-        golongan_darah: string;
-        riwayat_penyakit: string;
-        alergi: string;
-    };
-    punyaServer: number;
 }
 
-const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
+const FormCreateCatatanLayanan: React.FC<Props> = ({
     pasien,
+    punyaServer,
     data,
     setData,
     handleSubmit,
     processing,
-    punyaServer,
     errors,
 }) => {
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
-        setData(e.target.name, e.target.value);
+        setData(e.target.name as keyof Data, e.target.value);
+    };
+
+    const formatDate = (d?: string | null) => {
+        if (!d) return '-';
+        try {
+            const dt = new Date(d);
+            if (isNaN(dt.getTime())) return String(d);
+            return dt.toLocaleDateString('id-ID');
+        } catch {
+            return String(d);
+        }
     };
 
     return (
@@ -67,7 +83,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                             </label>
                             <input
                                 type="text"
-                                value={pasien.nomor_pasien}
+                                value={pasien.nomor_pasien ?? '-'}
                                 disabled
                                 className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
                             />
@@ -80,7 +96,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                             </label>
                             <input
                                 type="text"
-                                value={pasien.nik}
+                                value={pasien.nik ?? '-'}
                                 disabled
                                 className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
                             />
@@ -93,13 +109,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                             </label>
                             <input
                                 type="text"
-                                value={
-                                    pasien.tanggal_lahir instanceof Date
-                                        ? pasien.tanggal_lahir.toLocaleDateString(
-                                              'id-ID',
-                                          )
-                                        : String(pasien.tanggal_lahir)
-                                }
+                                value={formatDate(pasien.tanggal_lahir)}
                                 disabled
                                 className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
                             />
@@ -112,7 +122,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                             </label>
                             <input
                                 type="text"
-                                value={pasien.tempat_lahir}
+                                value={pasien.tempat_lahir ?? '-'}
                                 disabled
                                 className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
                             />
@@ -125,7 +135,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                             </label>
                             <input
                                 type="text"
-                                value={pasien.no_hp}
+                                value={pasien.no_hp ?? '-'}
                                 disabled
                                 className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
                             />
@@ -138,7 +148,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                             </label>
                             <input
                                 type="text"
-                                value={pasien.golongan_darah || '-'}
+                                value={pasien.golongan_darah ?? '-'}
                                 disabled
                                 className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
                             />
@@ -151,7 +161,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                             </label>
                             <input
                                 type="text"
-                                value={pasien.riwayat_penyakit || '-'}
+                                value={pasien.riwayat_penyakit ?? '-'}
                                 disabled
                                 className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
                             />
@@ -163,7 +173,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                                 Alergi
                             </label>
                             <textarea
-                                value={pasien.alergi || '-'}
+                                value={pasien.alergi ?? '-'}
                                 disabled
                                 rows={2}
                                 className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
@@ -171,8 +181,9 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                         </div>
                     </div>
                 </div>
-                {/* Keluhan Utama (readonly) */}
-                <div className="md:col-span-2">
+
+                {/* Keluhan Utama */}
+                <div className="mb-4">
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                         Keluhan Utama
                     </label>
@@ -182,13 +193,13 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                         readOnly
                         rows={3}
                         className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-700"
-                        placeholder="Keluhan utama pasien (otomatis dari antrian)"
+                        placeholder="-"
                     />
                 </div>
 
-                <hr className="mt-4 py-4" />
+                <hr className="my-4" />
 
-                {punyaServer === 1 && (
+                {punyaServer === 1 ? (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         {/* Detail Keluhan */}
                         <div className="md:col-span-2">
@@ -271,10 +282,18 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                             )}
                         </div>
                     </div>
+                ) : (
+                    <div className="py-6">
+                        <p className="mb-3 text-sm text-gray-600">
+                            Klinik ini tidak punya server — catat manual. Hanya
+                            nomor pasien, nama, dan keluhan utama yang tersimpan
+                            otomatis.
+                        </p>
+                    </div>
                 )}
             </div>
 
-            {/* Tombol – persis sama dengan FormCreatePasien */}
+            {/* Tombol */}
             <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
                 <Link
                     href="/dokter/antrian"
@@ -287,7 +306,7 @@ const FormCreateCatatanLayanan: React.FC<FormCreateCatatanLayananProps> = ({
                     disabled={processing}
                     className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                 >
-                    {processing ? 'Menyimpan...' : 'Simpan'}
+                    {processing ? 'Membuatkan Resep...' : 'Siapkan Resep'}
                 </button>
             </div>
         </form>

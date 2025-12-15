@@ -4,6 +4,7 @@ import { Inertia } from '@inertiajs/inertia';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Filter, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface User {
     id: number;
@@ -46,14 +47,40 @@ export default function UsersIndexAdmin() {
     const deleteSelected = () => {
         if (selectedIds.length === 0) return;
         if (confirm(`Yakin ingin menghapus ${selectedIds.length} user?`)) {
-            selectedIds.forEach((id) => Inertia.delete(`/users/${id}`));
+            selectedIds.forEach((id) =>
+                Inertia.delete(`/users/${id}`, {
+                    onSuccess: () => {
+                        toast.success('User berhasil dihapus', {
+                            description: `Data ${selectedIds.length} user telah dihapus dari sistem.`,
+                        });
+                    },
+                    onError: () => {
+                        toast.error('Gagal menghapus user', {
+                            description:
+                                'Terjadi kesalahan saat menghapus data user.',
+                        });
+                    },
+                }),
+            );
             setSelectedIds([]);
         }
     };
 
     const handleDelete = (id: number) => {
         if (confirm('Apakah anda yakin ingin menghapus user ini?')) {
-            Inertia.delete(`/admin/tambah-user/${id}`);
+            Inertia.delete(`/admin/tambah-user/${id}`, {
+                onSuccess: () => {
+                    toast.success('User berhasil dihapus', {
+                        description: 'Data user telah dihapus dari sistem.',
+                    });
+                },
+                onError: () => {
+                    toast.error('Gagal menghapus user', {
+                        description:
+                            'Terjadi kesalahan saat menghapus data user.',
+                    });
+                },
+            });
         }
     };
 
@@ -117,7 +144,7 @@ export default function UsersIndexAdmin() {
                                             type="checkbox"
                                             checked={
                                                 selectedIds.length ===
-                                                users.length &&
+                                                    users.length &&
                                                 users.length > 0
                                             }
                                             onChange={toggleSelectAll}

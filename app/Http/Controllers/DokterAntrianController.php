@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Antrian;
+use App\Models\Dokter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -18,11 +19,11 @@ class DokterAntrianController extends Controller
 
         $dokter = $user->dokter;
 
-        if (!$dokter) {
-            abort(404, "Data dokter tidak ditemukan");
+        if (! $dokter) {
+            abort(404, 'Data dokter tidak ditemukan');
         }
 
-        $antrian = Antrian::with(['pasien:id,nama_lengkap'])
+        $antrian = Antrian::with(['pasien:id,nomor_pasien,nama_lengkap'])
             ->where('dokter_id', $dokter->id)
             ->orderBy('nomor_antrian', 'asc')
             ->get()
@@ -30,6 +31,7 @@ class DokterAntrianController extends Controller
                 return [
                     'id' => $a->id,
                     'nomor_antrian' => $a->nomor_antrian,
+                    'nomor_pasien' => $a->pasien?->nomor_pasien ?? '-',
                     'pasien_nama' => $a->pasien?->nama_lengkap ?? '-',
                     'keluhan' => $a->keluhan ?? '-',
                     'status' => $a->status,
@@ -41,7 +43,6 @@ class DokterAntrianController extends Controller
             'antrian' => $antrian,
         ]);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -80,8 +81,75 @@ class DokterAntrianController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $user = Auth::user();
+        $dokter = Dokter::where('user_id', $user->id)->firstOrFail();
+
+        $antrian = Antrian::findOrFail($id);
+
+        // Jika antrian ini sudah sedang diperiksa oleh dokter yang sama → langsung masuk lagi
+        if ($antrian->status === 'Sedang diperiksa' && $antrian->dokter_id === $dokter->id) {
+            return redirect()->route('dokter.tangani.create', $antrian->id)
+                ->with('info', 'Anda melanjutkan pemeriksaan pasien yang sedang diperiksa.');
+        }
+
+        // Cek apakah dokter sedang menangani pasien lain (exclude antrian ini)
+        $sedang = Antrian::where('dokter_id', $dokter->id)
+            ->where('status', 'Sedang diperiksa')
+            ->where('id', '!=', $antrian->id) // <-- tambahkan ini
+            ->first();
+
+        if ($sedang) {
+            return back()->withErrors([
+                'message' => 'Anda sudah menangani pasien lain. Selesaikan dulu sebelum menangani pasien baru.',
+            ]);
+        }
+
+        // Kalau belum ada pasien aktif, update status
+        $antrian->status = 'Sedang diperiksa';
+        $antrian->dokter_id = $dokter->id;
+        $antrian->save();
+
+        return redirect()->route('dokter.tangani.create', $antrian->id)
+            ->with('success', 'Status antrian berhasil diperbarui menjadi Sedang diperiksa.');
     }
+
+    //     public function update(Request $request, string $id)
+    // {
+    //     $user = Auth::user();
+    //     $dokter = Dokter::where('user_id', $user->id)->firstOrFail();
+
+    //     $antrian = Antrian::findOrFail($id);
+
+    //     // Kalau dokter klik antrian yang sama
+    //     if (
+    //         $antrian->status === 'Sedang diperiksa' &&
+    //         $antrian->dokter_id === $dokter->id
+    //     ) {
+    //         return redirect()
+    //             ->route('dokter.tangani.create', $antrian->id);
+    //     }
+
+    //     // Cek apakah masih menangani pasien lain
+    //     $sedang = Antrian::where('dokter_id', $dokter->id)
+    //         ->where('status', 'Sedang diperiksa')
+    //         ->where('id', '!=', $antrian->id)
+    //         ->first();
+
+    //     if ($sedang) {
+    //         return back()->withErrors([
+    //             'message' =>
+    //                 'Anda masih menangani pasien lain. Selesaikan terlebih dahulu.',
+    //         ]);
+    //     }
+
+    //     // Klaim antrian
+    //     $antrian->update([
+    //         'status' => 'Sedang diperiksa',
+    //         'dokter_id' => $dokter->id,
+    //     ]);
+
+    //     return redirect()->route('dokter.tangani.create', $antrian->id);
+    // }
 
     /**
      * Remove the specified resource from storage.

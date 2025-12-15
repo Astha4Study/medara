@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 type Klinik = {
     id: number;
@@ -81,10 +82,17 @@ export default function KlinikEditAdmin({ klinik }: Props) {
 
         router.post(`/admin/klinik/${klinik.id}?_method=PUT`, formData, {
             onSuccess: () => {
-                console.log('✅ Data klinik berhasil diperbarui');
+                toast.success('Klinik berhasil diperbarui', {
+                    description:
+                        'Data klinik telah berhasil disimpan ke sistem.',
+                });
             },
             onError: (err) => {
-                console.error('❌ Error:', err);
+                toast.error('Gagal memperbarui klinik', {
+                    description:
+                        'Terjadi kesalahan saat menyimpan data klinik.',
+                });
+                console.error(err);
             },
         });
     };

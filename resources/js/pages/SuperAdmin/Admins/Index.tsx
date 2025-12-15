@@ -1,9 +1,21 @@
+import DropdownAdminSuperAdmin from '@/components/dropdown-menu-tambah-admin-super-admin';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Inertia } from '@inertiajs/inertia';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Filter, Plus, Search, X } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Filter, Plus, Search, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface Admin {
     id: number;
@@ -22,14 +34,40 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Daftar Admin', href: '' }];
 export default function AdminsIndexSuperAdmin() {
     const { props } = usePage<PageProps>();
     const { admins } = props;
-
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [toDelete, setToDelete] = useState<number | null>(null);
+    const [bulkDelete, setBulkDelete] = useState(false);
 
-    const toggleSelect = (id: number) => {
+    const filteredAdmins = admins.filter(
+        (a) =>
+            a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            a.email.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    const toggleSelect = (id: number) =>
         setSelectedIds((prev) =>
             prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
         );
+
+    const openSingleDelete = (id: number) => {
+        setToDelete(id);
+        setBulkDelete(false);
+        setDialogOpen(true);
+    };
+
+    const confirmSingleDelete = () => {
+        if (!toDelete) return;
+        router.delete(`/super-admin/kelola-admin/${toDelete}`, {
+            onSuccess: () => {
+                toast.success('Admin berhasil dihapus');
+                setSelectedIds((prev) => prev.filter((i) => i !== toDelete));
+            },
+            onError: () => toast.error('Gagal menghapus admin'),
+        });
+        setDialogOpen(false);
+        setToDelete(null);
     };
 
     const toggleSelectAll = () => {
@@ -38,6 +76,29 @@ export default function AdminsIndexSuperAdmin() {
         } else {
             setSelectedIds(admins.map((a) => a.id));
         }
+    };
+
+    const openBulkDelete = () => {
+        if (selectedIds.length === 0) return;
+        setBulkDelete(true);
+        setDialogOpen(true);
+    };
+
+    const confirmBulkDelete = () => {
+        if (selectedIds.length === 0) return;
+        selectedIds.forEach((id) =>
+            router.delete(`/super-admin/kelola-admin/${id}`, {
+                onSuccess: () => {
+                    toast.success(
+                        `${selectedIds.length} admin berhasil dihapus`,
+                    );
+                    setSelectedIds([]);
+                },
+                onError: () => toast.error('Gagal menghapus beberapa admin'),
+            }),
+        );
+        setDialogOpen(false);
+        setBulkDelete(false);
     };
 
     const deleteSelected = () => {
@@ -50,17 +111,15 @@ export default function AdminsIndexSuperAdmin() {
         }
     };
 
+    const handleDeleteFromDropdown = (id: number) => {
+        openSingleDelete(id);
+    };
+
     const handleDelete = (id: number) => {
         if (confirm('Apakah anda yakin ingin menghapus admin ini?')) {
             Inertia.delete(`/super-admin/admins/${id}`);
         }
     };
-
-    const filteredAdmins = admins.filter(
-        (a) =>
-            a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            a.email.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -116,7 +175,7 @@ export default function AdminsIndexSuperAdmin() {
                                             type="checkbox"
                                             checked={
                                                 selectedIds.length ===
-                                                admins.length &&
+                                                    admins.length &&
                                                 admins.length > 0
                                             }
                                             onChange={toggleSelectAll}
@@ -165,15 +224,16 @@ export default function AdminsIndexSuperAdmin() {
                                             <td className="px-6 py-4 text-gray-700">
                                                 {admin.created_at}
                                             </td>
-                                            <td className="space-x-2 px-6 py-4 text-center">
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(admin.id)
+                                            <td className="px-6 py-4 text-center">
+                                                <DropdownAdminSuperAdmin
+                                                    id={admin.id}
+                                                    name={admin.name}
+                                                    onDelete={() =>
+                                                        handleDeleteFromDropdown(
+                                                            admin.id,
+                                                        )
                                                     }
-                                                    className="text-red-600 hover:text-red-700"
-                                                >
-                                                    Hapus
-                                                </button>
+                                                />
                                             </td>
                                         </tr>
                                     ))
@@ -206,23 +266,51 @@ export default function AdminsIndexSuperAdmin() {
                         <span className="text-sm font-medium text-gray-700">
                             {selectedIds.length} admin dipilih
                         </span>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={deleteSelected}
-                                className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                            >
-                                Hapus
-                            </button>
-                            <button
-                                onClick={() => setSelectedIds([])}
-                                className="ml-2 text-gray-400 transition hover:text-gray-600"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
+                        <button
+                            onClick={openBulkDelete}
+                            className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                        >
+                            <Trash2 className="h-4 w-4" /> Hapus
+                        </button>
+                        <button
+                            onClick={() => setSelectedIds([])}
+                            className="ml-2 text-gray-400 transition hover:text-gray-600"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
                     </div>
                 )}
             </div>
+
+            <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {bulkDelete
+                                ? 'Hapus beberapa admin?'
+                                : 'Hapus admin?'}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {bulkDelete
+                                ? `Admin yang dipilih (${selectedIds.length}) akan dihapus secara permanen.`
+                                : 'Admin ini akan dihapus secara permanen.'}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-red-600 hover:bg-red-700"
+                            onClick={
+                                bulkDelete
+                                    ? confirmBulkDelete
+                                    : confirmSingleDelete
+                            }
+                        >
+                            Ya, Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AppLayout>
     );
 }
