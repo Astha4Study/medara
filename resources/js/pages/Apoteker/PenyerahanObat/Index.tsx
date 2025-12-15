@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react'; 
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 type ResepPembayaran = {
@@ -9,7 +9,7 @@ type ResepPembayaran = {
     pasien_nama: string;
     dokter_nama: string;
     total_harga: number;
-    status_pembayaran: 'belum_bayar' | 'lunas';
+    status_pembayaran: 'belum_bayar' | 'lunas' | '-';
     tanggal: string;
 };
 
@@ -18,17 +18,18 @@ type PageProps = {
 };
 
 const listTable = [
+    'No',
     'Nomor Pasien',
     'Nama Pasien',
     'Dokter',
+    'Status',
     'Total Harga',
     'Tanggal',
-    'Status',
     'Aksi',
 ];
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Pembayaran Resep', href: '/resepsionis/pembayaran' },
+    { title: 'Penyerahan Obat', href: '/apoteker/penyerahan-obat' },
 ];
 
 const statusBadge: Record<
@@ -43,18 +44,30 @@ const statusBadge: Record<
         label: 'Sudah Dibayar',
         className: 'bg-green-100 text-green-700',
     },
+    '-': {
+        label: '-',
+        className: 'bg-gray-100 text-gray-500',
+    },
 };
 
-export default function PembayaranIndexResepsionis() {
+export default function PenyerahanObatIndexApoteker() {
     const { reseps } = usePage<PageProps>().props;
     const [search, setSearch] = useState('');
 
-    const filtered = reseps.filter(
-        (r) =>
-            r.status_pembayaran === 'belum_bayar' &&
-            (r.pasien_nama.toLowerCase().includes(search.toLowerCase()) ||
-                r.nomor_pasien.toLowerCase().includes(search.toLowerCase())),
-    );
+    const filtered = reseps
+        .filter(
+            (r) =>
+                r.status_pembayaran === 'lunas' &&
+                (r.pasien_nama.toLowerCase().includes(search.toLowerCase()) ||
+                    r.nomor_pasien
+                        .toLowerCase()
+                        .includes(search.toLowerCase())),
+        )
+        .sort((a, b) => {
+            return (
+                new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()
+            );
+        });
 
     const formatRupiah = (value: number) =>
         new Intl.NumberFormat('id-ID', {
@@ -65,16 +78,16 @@ export default function PembayaranIndexResepsionis() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Pembayaran Resep" />
+            <Head title="Penyerahan Obat" />
 
             <div className="p-6">
                 {/* Header */}
                 <div>
                     <h1 className="text-2xl font-semibold text-gray-900">
-                        Pembayaran Resep
+                        Penyerahan Obat
                     </h1>
                     <p className="mt-1 mb-4 text-sm text-gray-500">
-                        Resep yang sudah selesai dan siap dilakukan pembayaran
+                        Resep yang sudah dibayar dan siap diserahkan ke pasien
                     </p>
                 </div>
 
@@ -96,11 +109,15 @@ export default function PembayaranIndexResepsionis() {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {filtered.length > 0 ? (
-                                    filtered.map((item) => (
+                                    filtered.map((item, index) => (
                                         <tr
                                             key={item.id}
                                             className="transition hover:bg-gray-50"
                                         >
+                                            <td className="px-6 py-4 text-gray-700">
+                                                {index + 1}
+                                            </td>
+
                                             <td className="px-6 py-4 font-medium text-gray-900">
                                                 {item.nomor_pasien}
                                             </td>
@@ -109,18 +126,6 @@ export default function PembayaranIndexResepsionis() {
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
                                                 {item.dokter_nama}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-700">
-                                                {formatRupiah(item.total_harga)}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-700">
-                                                {new Date(
-                                                    item.tanggal,
-                                                ).toLocaleDateString('id-ID', {
-                                                    day: '2-digit',
-                                                    month: 'long',
-                                                    year: 'numeric',
-                                                })}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
                                                 <span
@@ -135,13 +140,25 @@ export default function PembayaranIndexResepsionis() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
+                                                {formatRupiah(item.total_harga)}
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-700">
+                                                {new Date(
+                                                    item.tanggal,
+                                                ).toLocaleDateString('id-ID', {
+                                                    day: '2-digit',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })}
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-700">
                                                 {item.status_pembayaran ===
-                                                'belum_bayar' ? (
+                                                'lunas' ? (
                                                     <Link
-                                                        href={`/resepsionis/pembayaran/${item.id}/proses-bayar`}
+                                                        href={`/apoteker/penyerahan-obat/${item.id}/serahkan`}
                                                         className="rounded-md bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
                                                     >
-                                                        Proses Bayar
+                                                        Serahkan Obat
                                                     </Link>
                                                 ) : (
                                                     <span className="text-xs text-gray-400">
@@ -157,7 +174,7 @@ export default function PembayaranIndexResepsionis() {
                                             colSpan={listTable.length}
                                             className="px-6 py-10 text-center text-sm text-gray-500"
                                         >
-                                            Tidak ada resep yang perlu dibayar
+                                            Tidak ada resep yang siap diserahkan
                                         </td>
                                     </tr>
                                 )}

@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminPengaturanController;
 use App\Http\Controllers\AdminPengaturanKlinikController;
 use App\Http\Controllers\ApotekerKlinikController;
 use App\Http\Controllers\ApotekerObatController;
+use App\Http\Controllers\ApotekerPenyerahanObatController;
 use App\Http\Controllers\ApotekerResepController;
 use App\Http\Controllers\ApotekerResepMasukController;
 use App\Http\Controllers\DokterAntrianController;
@@ -128,6 +129,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->parameters(['resep-masuk' => 'resep']);
             Route::put('resep-masuk/{resep}/mulai', [ApotekerResepController::class, 'update'])
                 ->name('resep-masuk.mulai');
+            Route::resource('penyerahan-obat', ApotekerPenyerahanObatController::class)
+                ->parameters(['penyerahan-obat' => 'serahkan'])
+                ->only('index');
+            Route::get('penyerahan-obat/{serahkan}/serahkan', [ApotekerPenyerahanObatController::class, 'create'])
+                ->name('penyerahan-obat.create');
         });
 });
 

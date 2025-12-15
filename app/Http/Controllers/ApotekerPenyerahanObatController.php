@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pembayaran;
 use App\Models\Resep;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
-class ResepsionisPembayaranController extends Controller
+class ApotekerPenyerahanObatController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,10 +15,12 @@ class ResepsionisPembayaranController extends Controller
     {
         $reseps = Resep::with([
             'pasien:id,nama_lengkap,nomor_pasien',
-            'dokter:id,name', // kalau nama dokter ada di tabel users
+            'dokter:id,name',
             'pembayaran:id,resep_id,status',
         ])
-            ->where('status', 'selesai') // ✅ hanya resep selesai
+            ->whereHas('pembayaran', function ($q) {
+                $q->where('status', 'lunas');
+            })
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($resep) {
@@ -29,16 +29,14 @@ class ResepsionisPembayaranController extends Controller
                     'nomor_resep' => 'RSP-'.str_pad($resep->id, 6, '0', STR_PAD_LEFT),
                     'nomor_pasien' => $resep->pasien->nomor_pasien ?? '-',
                     'pasien_nama' => $resep->pasien->nama_lengkap ?? '-',
-                    'dokter_nama' => $resep->dokter->name ?? '-', // ambil nama dokter dari relasi user
+                    'dokter_nama' => $resep->dokter->name ?? '-',
                     'total_harga' => $resep->total_harga,
-                    'status_pembayaran' => $resep->pembayaran->status ?? 'belum_bayar', // ✅ status pembayaran
+                    'status_pembayaran' => $resep->pembayaran->status ?? '-',
                     'tanggal' => $resep->created_at->format('d F Y'),
                 ];
             });
 
-        // dd($reseps);
-
-        return Inertia::render('Resepsionis/Pembayaran/Index', [
+        return Inertia::render('Apoteker/PenyerahanObat/Index', [
             'reseps' => $reseps,
         ]);
     }
@@ -56,12 +54,12 @@ class ResepsionisPembayaranController extends Controller
             'catatanLayanan:id,diagnosa',
         ])->findOrFail($id);
 
-        return Inertia::render('Resepsionis/Pembayaran/Create', [
+        return Inertia::render('Apoteker/PenyerahanObat/Create', [
             'resep' => [
                 'id' => $resep->id,
                 'total_harga' => $resep->total_harga,
                 'status' => $resep->status ?? 'belum_bayar',
-                      'diagnosa' => optional($resep->catatanLayanan)->diagnosa ?? '-',
+                'diagnosa' => optional($resep->catatanLayanan)->diagnosa ?? '-',
                 'pasien' => [
                     'nama_lengkap' => $resep->pasien->nama_lengkap,
                     'nomor_pasien' => $resep->pasien->nomor_pasien,
@@ -86,55 +84,9 @@ class ResepsionisPembayaranController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $id)
+    public function store(Request $request)
     {
-        $request->validate([
-            'uang_dibayar' => 'required|numeric|min:0',
-            'metode_pembayaran' => 'nullable|string',
-        ]);
-
-        return DB::transaction(function () use ($request, $id) {
-            $resep = Resep::lockForUpdate()->findOrFail($id);
-
-            $total = $resep->total_harga;
-            $uang = $request->uang_dibayar;
-
-            if ($uang < $total) {
-                return back()->withErrors([
-                    'uang_dibayar' => 'Uang yang dibayarkan kurang dari total harga.',
-                ]);
-            }
-
-            $kembalian = $uang - $total;
-
-            // 1. Pembayaran utama
-            $pembayaran = Pembayaran::create([
-                'resep_id' => $resep->id,
-                'resepsionis_id' => auth()->id(),
-                'total_bayar' => $total,
-                'status' => 'lunas',
-            ]);
-
-            // 2. Detail pembayaran
-            $pembayaran->detail()->create([
-                'uang_dibayar' => $uang,
-                'kembalian' => $kembalian,
-                'metode_pembayaran' => $request->metode_pembayaran ?? 'cash',
-            ]);
-
-            // 3. Update pembayaran
-            $pembayaran->update([
-                'status' => 'lunas',
-            ]);
-
-            return redirect()
-                ->route('resepsionis.pembayaran.index')
-                ->with(
-                    'success',
-                    'Pembayaran berhasil. Kembalian: Rp '.
-                    number_format($kembalian, 0, ',', '.')
-                );
-        });
+        //
     }
 
     /**
