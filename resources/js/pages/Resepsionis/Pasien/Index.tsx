@@ -121,7 +121,7 @@ export default function PasienIndexResepsionis() {
                 {/* Table */}
                 <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
+                        <table className="min-w-max text-sm">
                             <thead>
                                 <tr className="border-b border-gray-200 bg-gray-50">
                                     <th className="px-6 py-3 text-left">
