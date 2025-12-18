@@ -20,7 +20,7 @@ class ResepsionisPembayaranController extends Controller
             'resep.dokter.user:id,name',
         ])
             ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($pembayaran) {
                 $resep = $pembayaran->resep;
@@ -33,7 +33,10 @@ class ResepsionisPembayaranController extends Controller
                     'dokter_nama' => $resep->dokter->user->name ?? '-',
                     'total_harga' => $resep->total_harga,
                     'status_pembayaran' => $pembayaran->status,
-                    'tanggal' => $pembayaran->created_at->format('d F Y'),
+
+                    'tanggal' => $pembayaran->created_at->toISOString(),
+
+                    'tanggal_label' => $pembayaran->created_at->format('d F Y'),
                 ];
             });
 
@@ -41,6 +44,7 @@ class ResepsionisPembayaranController extends Controller
             'reseps' => $pembayarans,
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -71,6 +75,19 @@ class ResepsionisPembayaranController extends Controller
      */
     public function edit(string $id)
     {
+        $allowedResep = Pembayaran::with('resep')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'asc')
+            ->first();
+
+        if (!$allowedResep) {
+            abort(403, 'Tidak ada pembayaran yang dapat diproses.');
+        }
+
+        if ($allowedResep->resep_id != $id) {
+            abort(403, 'Resep ini belum bisa diproses.');
+        }
+
         $resep = Resep::with([
             'pasien:id,nama_lengkap,nomor_pasien,nik,riwayat_penyakit',
             'dokter.user:id,name',
@@ -92,7 +109,7 @@ class ResepsionisPembayaranController extends Controller
                     'riwayat_penyakit' => $resep->pasien->riwayat_penyakit,
                 ],
                 'dokter' => [
-                    'nama' => $resep->dokter->name ?? '-',
+                    'nama' => $resep->dokter->user->name ?? '-',
                 ],
                 'detail' => $resep->resepDetail->map(fn($d) => [
                     'id' => $d->id,
@@ -105,6 +122,7 @@ class ResepsionisPembayaranController extends Controller
             ],
         ]);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -135,9 +153,11 @@ class ResepsionisPembayaranController extends Controller
                 ->where('status', 'pending')
                 ->firstOrFail();
 
+            $resepsionisId = auth()->user()->id;
+
             // Update pembayaran utama
             $pembayaran->update([
-                'resepsionis_id' => auth()->id(),
+                'resepsionis_id' => $resepsionisId,
                 'total_bayar' => $total,
                 'status' => 'lunas',
             ]);

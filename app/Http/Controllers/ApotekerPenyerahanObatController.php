@@ -27,7 +27,7 @@ class ApotekerPenyerahanObatController extends Controller
                 'nomor_resep' => 'RSP-' . str_pad($r->id, 6, '0', STR_PAD_LEFT),
                 'nomor_pasien' => $r->pasien->nomor_pasien ?? '-',
                 'pasien_nama' => $r->pasien->nama_lengkap ?? '-',
-                'dokter_nama' => $r->dokter->name ?? '-',
+                'dokter_nama' => $r->dokter->user->name ?? '-',
                 'total_harga' => $r->total_harga,
                 'status_pembayaran' => $r->pembayaran->status ?? '-',
                 'tanggal' => $r->created_at->format('Y-m-d'),

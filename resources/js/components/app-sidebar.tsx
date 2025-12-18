@@ -1,10 +1,11 @@
 import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
+    SidebarGroup,
+    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -14,11 +15,9 @@ import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
-    BookOpen,
     BookPlus,
     ClipboardList,
     CreditCard,
-    Folder,
     HandCoins,
     Hospital,
     LayoutGrid,
@@ -29,6 +28,7 @@ import {
     Users,
 } from 'lucide-react';
 import AppLogo from './app-logo';
+import { NavMain } from './nav-main';
 
 export function AppSidebar() {
     const { props } = usePage<{ auth?: { roles?: string[] } }>();
@@ -142,16 +142,36 @@ export function AppSidebar() {
         permissions.footer.includes(item.title),
     );
 
-    const footerNavRepoItems: NavItem[] = [
+    const groupedNav: { title: string; items: NavItem[] }[] = [
         {
-            title: 'Repository',
-            href: 'https://github.com/laravel/react-starter-kit',
-            icon: Folder,
+            title: 'Umum',
+            items: mainNavItems.filter((i) => ['Dashboard'].includes(i.title)),
         },
         {
-            title: 'Documentation',
-            href: 'https://laravel.com/docs/starter-kits#react',
-            icon: BookOpen,
+            title: 'Manajemen Pasien',
+            items: mainNavItems.filter((i) =>
+                ['Pasien', 'Antrian', 'Catatan Layanan Pasien'].includes(
+                    i.title,
+                ),
+            ),
+        },
+        {
+            title: 'Manajemen Klinik',
+            items: mainNavItems.filter((i) =>
+                ['Klinik', 'Tambah Layanan'].includes(i.title),
+            ),
+        },
+        {
+            title: 'Apotek',
+            items: mainNavItems.filter((i) =>
+                ['Daftar Obat', 'Resep Masuk', 'Penyerahan Obat'].includes(
+                    i.title,
+                ),
+            ),
+        },
+        {
+            title: 'Pembayaran',
+            items: mainNavItems.filter((i) => ['Pembayaran'].includes(i.title)),
         },
     ];
 
@@ -170,12 +190,21 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent className="mt-4">
-                <NavMain items={mainNavItems} />
+                {groupedNav.map(
+                    (group) =>
+                        group.items.length > 0 && (
+                            <SidebarGroup key={group.title}>
+                                <SidebarGroupLabel>
+                                    {group.title}
+                                </SidebarGroupLabel>
+                                <NavMain items={group.items} />
+                            </SidebarGroup>
+                        ),
+                )}
             </SidebarContent>
 
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavFooter items={footerNavRepoItems} className="mt-2" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
