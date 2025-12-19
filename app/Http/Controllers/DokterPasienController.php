@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dokter;
-use App\Models\Klinik;
 use App\Models\Pasien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,18 +17,25 @@ class DokterPasienController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->hasRole('dokter')) {
+        if (! $user->hasRole('dokter')) {
             abort(403, 'Hanya dokter yang dapat mengakses halaman ini.');
         }
 
+        // Ambil data dokter SECARA EKSPLISIT
+        $dokter = $user->dokter()->with('klinik')->first();
+
+        if (! $dokter) {
+            abort(404, 'Data dokter tidak ditemukan.');
+        }
+
         $pasien = Pasien::with('klinik')
-            ->where('klinik_id', $user->klinik_id)
+            ->where('klinik_id', $dokter->klinik_id)
             ->latest()
             ->get();
 
         return Inertia::render('Dokter/Pasien/Index', [
             'pasien' => $pasien,
-            'isDokter' => true,
+            'dokter' => $dokter,
         ]);
     }
 
@@ -56,10 +62,19 @@ class DokterPasienController extends Controller
     {
         $user = Auth::user();
 
-        $dokter = Dokter::where('user_id', $user->id)->first();
+        if (! $user->hasRole('dokter')) {
+            abort(403);
+        }
 
-        if (!$dokter) {
-            abort(403, 'Data dokter tidak ditemukan.');
+        $dokter = $user->dokter;
+
+        if (! $dokter) {
+            abort(404, 'Data dokter tidak ditemukan.');
+        }
+
+        // VALIDASI KLINIK YANG BENAR
+        if ($pasien->klinik_id !== $dokter->klinik_id) {
+            abort(403, 'Pasien bukan milik klinik Anda.');
         }
 
         $pasien->load('klinik');
@@ -67,7 +82,6 @@ class DokterPasienController extends Controller
         return Inertia::render('Dokter/Pasien/Show', [
             'pasien' => $pasien,
         ]);
-
     }
 
     /**
@@ -75,7 +89,7 @@ class DokterPasienController extends Controller
      */
     public function edit(Pasien $pasien)
     {
-        // 
+        //
     }
 
     /**
@@ -83,7 +97,7 @@ class DokterPasienController extends Controller
      */
     public function update(Request $request, Pasien $pasien)
     {
-        // 
+        //
     }
 
     /**

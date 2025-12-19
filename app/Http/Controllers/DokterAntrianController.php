@@ -17,6 +17,8 @@ class DokterAntrianController extends Controller
     {
         $user = Auth::user();
 
+        // dd(Auth::id(), Auth::user()->role, Auth::user()->dokter);
+
         $dokter = $user->dokter;
 
         if (! $dokter) {

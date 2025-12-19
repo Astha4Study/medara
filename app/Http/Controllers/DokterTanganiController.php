@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Antrian;
+use App\Models\PemeriksaanFisik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -30,9 +31,15 @@ class DokterTanganiController extends Controller
 
         $antrian->load('pasien', 'klinik');
 
+        $pemeriksaanFisik = PemeriksaanFisik::where('pasien_id', $antrian->pasien_id)
+            ->where('klinik_id', $antrian->klinik_id)
+            ->latest()
+            ->first();
+
         return Inertia::render('Dokter/Tangani/Create', [
             'antrian' => $antrian->only('id', 'keluhan', 'tanggal_kunjungan'),
             'pasien' => $antrian->pasien->only('id', 'nama_lengkap', 'nomor_pasien', 'nik', 'tanggal_lahir', 'tempat_lahir', 'no_hp', 'golongan_darah', 'riwayat_penyakit', 'alergi'),
+            'pemeriksaan_fisik' => $pemeriksaanFisik?->only('id', 'berat_badan', 'tinggi_badan', 'suhu_tubuh', 'tekanan_darah', 'kondisi_khusus'),
             'klinik' => $antrian->klinik->only('id'),
             'punya_server' => $antrian->klinik->punya_server,
         ]);

@@ -12,6 +12,7 @@ class Pembayaran extends Model
     protected $table = 'pembayaran';
 
     protected $fillable = [
+        'klinik_id',
         'resep_id',
         'resepsionis_id',
         'total_bayar',

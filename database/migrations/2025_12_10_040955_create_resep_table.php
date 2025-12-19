@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('catatan_layanan_id')->constrained('catatan_layanan')->onDelete('cascade');
             $table->foreignId('pasien_id')->constrained('pasien')->onDelete('cascade');
             $table->foreignId('klinik_id')->constrained('klinik')->onDelete('cascade');
-            $table->foreignId('dokter_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('dokter_id')->nullable()->constrained('dokter')->onDelete('set null');
             $table->foreignId('apoteker_id')->nullable()->constrained('users')->onDelete('set null');
             $table->enum('status', ['pending', 'sedang_dibuat', 'selesai'])->default('pending');
             $table->timestamps();

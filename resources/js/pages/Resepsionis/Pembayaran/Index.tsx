@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { route } from 'ziggy-js';
 
 type ResepPembayaran = {
     id: number;
@@ -18,13 +19,13 @@ type PageProps = {
 };
 
 const listTable = [
-    'No',
+    'No Antrian',
     'Nomor Pasien',
     'Nama Pasien',
     'Dokter',
     'Total Harga',
-    'Tanggal',
     'Status',
+    'Tanggal',
     'Aksi',
 ];
 
@@ -122,15 +123,6 @@ export default function PembayaranIndexResepsionis() {
                                                 {formatRupiah(item.total_harga)}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {new Date(
-                                                    item.tanggal,
-                                                ).toLocaleDateString('id-ID', {
-                                                    day: '2-digit',
-                                                    month: 'long',
-                                                    year: 'numeric',
-                                                })}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-700">
                                                 <span
                                                     className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadge[item.status_pembayaran].className}`}
                                                 >
@@ -143,22 +135,33 @@ export default function PembayaranIndexResepsionis() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {[
+                                                {new Date(
+                                                    item.tanggal,
+                                                ).toLocaleDateString('id-ID', {
+                                                    day: '2-digit',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })}
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-700">
+                                                {index === 0 &&
+                                                [
                                                     'pending',
                                                     'belum_bayar',
                                                 ].includes(
                                                     item.status_pembayaran,
                                                 ) ? (
                                                     <Link
-                                                        href={`/resepsionis/pembayaran/${item.id}/proses-bayar`}
+                                                        href={route(
+                                                            'resepsionis.pembayaran.proses-bayar',
+                                                            item.id,
+                                                        )}
                                                         className="rounded-md bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
                                                     >
                                                         Proses Bayar
                                                     </Link>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400">
-                                                        -
-                                                    </span>
+                                                    <></>
                                                 )}
                                             </td>
                                         </tr>

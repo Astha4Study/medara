@@ -2,11 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Klinik;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 
 class Dokter extends Model
 {
@@ -35,25 +32,5 @@ class Dokter extends Model
     public function antrian()
     {
         return $this->hasMany(Antrian::class);
-    }
-
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($dokter) {
-            // Ambil user yang sedang login
-            $user = Auth::user();
-
-            if ($user && $user->hasRole('admin')) {
-                // Ambil klinik yang dibuat oleh admin tersebut
-                $klinik = Klinik::where('created_by', $user->id)->first();
-
-                if ($klinik) {
-                    $dokter->klinik_id = $klinik->id;
-                }
-            }
-        });
     }
 }

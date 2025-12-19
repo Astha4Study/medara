@@ -52,7 +52,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function PembayaranCreateResepsionis({ resep }: Props) {
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, put, processing } = useForm({
         uang_dibayar: 0,
         metode_pembayaran: 'cash',
     });
@@ -60,7 +60,7 @@ export default function PembayaranCreateResepsionis({ resep }: Props) {
     const [openConfirm, setOpenConfirm] = useState(false);
 
     const handleConfirmSubmit = () => {
-        post(route('resepsionis.pembayaran.store', resep.id), {
+        put(route('resepsionis.pembayaran.update', resep.id), {
             preserveScroll: true,
             onSuccess: () => {
                 setOpenConfirm(false);
@@ -86,7 +86,6 @@ export default function PembayaranCreateResepsionis({ resep }: Props) {
                     {/* Data Pasien & Dokter */}
                     <DataPasienResep
                         pasien={resep.pasien}
-                        dokter={resep.dokter}
                         diagnosa={resep.diagnosa}
                     />
 

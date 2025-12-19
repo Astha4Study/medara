@@ -94,7 +94,7 @@ export default function FormKalkulatorResepsionis({
                         >
                             <option value="cash">Cash</option>
                             <option value="qris">QRIS</option>
-                            <option value="debit">Debit</option>
+                            <option value="transfer">Transfer</option>
                         </select>
                     </div>
                 </div>

@@ -17,6 +17,7 @@ class Resep extends Model
         'klinik_id',
         'dokter_id',
         'apoteker_id',
+        'resep_teks',
         'status',
         'total_harga',
     ];
@@ -33,7 +34,7 @@ class Resep extends Model
 
     public function dokter()
     {
-        return $this->belongsTo(User::class, 'dokter_id');
+        return $this->belongsTo(Dokter::class, 'dokter_id');
     }
 
     public function apoteker()

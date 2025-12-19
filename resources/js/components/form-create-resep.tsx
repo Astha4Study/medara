@@ -1,16 +1,5 @@
-import { useResepStore } from '@/stores/resep.store';
 import { Link } from '@inertiajs/react';
-import { useState } from 'react';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from './ui/alert-dialog';
+import { useEffect, useState } from 'react';
 
 type Obat = {
     id: number;
@@ -20,11 +9,22 @@ type Obat = {
     penggunaan_obat: string;
 };
 
+type ObatItem = {
+    obat_id: number;
+    nama_obat: string;
+    jumlah: number;
+    satuan: string;
+    harga: number;
+    subtotal: number;
+    penggunaan_obat: string;
+};
+
 interface Props {
     obat_list: Obat[];
     processing: boolean;
     errors: Record<string, string>;
     onConfirm: () => void;
+    onChange: (list: ObatItem[]) => void;
     pasien: { id: number; nama_lengkap: string };
 }
 
@@ -33,56 +33,79 @@ export default function FormCreateResep({
     processing,
     errors,
     onConfirm,
+    onChange,
     pasien,
 }: Props) {
-    const [open, setOpen] = useState(false);
+    const [resepObat, setResepObat] = useState<ObatItem[]>([]);
 
-    const {
-        obat_list: resepObat,
-        tambahObat,
-        updateObat,
-        hapusObat,
-    } = useResepStore();
+    const tambahBaris = () =>
+        setResepObat((prev) => [
+            ...prev,
+            {
+                obat_id: 0,
+                nama_obat: '',
+                jumlah: 1,
+                satuan: '',
+                harga: 0,
+                subtotal: 0,
+                penggunaan_obat: '',
+            },
+        ]);
 
-    const tambahBaris = () => {
-        tambahObat({
-            obat_id: 0,
-            nama_obat: '',
-            jumlah: 1,
-            penggunaan_obat: '',
+    const updateObat = (index: number, key: keyof ObatItem, value: any) => {
+        setResepObat((prev) => {
+            const copy = [...prev];
+            copy[index] = { ...copy[index], [key]: value };
+
+            if (key === 'jumlah' || key === 'harga' || key === 'obat_id') {
+                const harga =
+                    key === 'obat_id'
+                        ? (obat_list.find((o) => o.id === value)?.harga ??
+                          copy[index].harga)
+                        : copy[index].harga;
+                copy[index].subtotal = copy[index].jumlah * harga;
+            }
+
+            return copy;
         });
     };
 
-    const formatRupiah = (value: number) =>
+    const hapusObat = (index: number) =>
+        setResepObat((prev) => prev.filter((_, i) => i !== index));
+
+    const total = resepObat.reduce((sum, o) => sum + o.harga * o.jumlah, 0);
+
+    const formatRupiah = (v: number) =>
         new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0,
-        }).format(value);
+        }).format(v);
 
-    const total = resepObat.reduce((sum, item) => {
-        const obat = obat_list.find((o) => o.id === item.obat_id);
-        return sum + (obat ? obat.harga * item.jumlah : 0);
-    }, 0);
+    const handlePilihObat = (index: number, obatId: number) => {
+        const obat = obat_list.find((o) => o.id === obatId);
+        if (!obat) return;
+        updateObat(index, 'obat_id', obatId);
+        updateObat(index, 'nama_obat', obat.nama_obat);
+        updateObat(index, 'satuan', obat.satuan);
+        updateObat(index, 'harga', obat.harga);
+        updateObat(index, 'penggunaan_obat', obat.penggunaan_obat);
+    };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (resepObat.length === 0) return;
-        setOpen(true);
+        onConfirm(); // langsung panggil parent
     };
 
-    const confirmSubmit = () => {
-        setOpen(false);
-        const form = document.querySelector('form') as HTMLFormElement;
-        form?.dispatchEvent(
-            new Event('submit', { bubbles: true, cancelable: true }),
-        );
-    };
+    useEffect(() => {
+        onChange(resepObat);
+    }, [resepObat]);
 
     return (
-        <>
-            <div>
-                <div className="space-y-4 p-6">
+        <form onSubmit={handleSubmit}>
+            <div className="rounded-xl border shadow-sm">
+                <div className="space-y-6 p-6">
                     {/* Daftar Obat */}
                     <div className="space-y-4">
                         {resepObat.map((item, idx) => (
@@ -90,7 +113,6 @@ export default function FormCreateResep({
                                 key={idx}
                                 className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
                             >
-                                {/* Header baris */}
                                 <div className="mb-3 flex items-center justify-between">
                                     <span className="text-sm font-medium text-gray-500">
                                         Obat ke-{idx + 1}
@@ -105,35 +127,18 @@ export default function FormCreateResep({
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                    {/* Nama Obat */}
                                     <div>
                                         <label className="mb-1 block text-sm font-medium text-gray-700">
                                             Nama Obat
                                         </label>
                                         <select
                                             value={item.obat_id}
-                                            onChange={(e) => {
-                                                const obat = obat_list.find(
-                                                    (o) =>
-                                                        o.id ===
-                                                        Number(e.target.value),
-                                                );
-                                                updateObat(
+                                            onChange={(e) =>
+                                                handlePilihObat(
                                                     idx,
-                                                    'obat_id',
                                                     Number(e.target.value),
-                                                );
-                                                updateObat(
-                                                    idx,
-                                                    'nama_obat',
-                                                    obat?.nama_obat || '',
-                                                );
-                                                updateObat(
-                                                    idx,
-                                                    'penggunaan_obat',
-                                                    obat?.penggunaan_obat || '',
-                                                );
-                                            }}
+                                                )
+                                            }
                                             required
                                             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
                                         >
@@ -148,7 +153,6 @@ export default function FormCreateResep({
                                         </select>
                                     </div>
 
-                                    {/* Jumlah */}
                                     <div>
                                         <label className="mb-1 block text-sm font-medium text-gray-700">
                                             Jumlah
@@ -168,25 +172,18 @@ export default function FormCreateResep({
                                         />
                                     </div>
 
-                                    {/* Harga Satuan (readonly) */}
                                     <div>
                                         <label className="mb-1 block text-sm font-medium text-gray-700">
                                             Harga Satuan
                                         </label>
                                         <input
                                             type="text"
-                                            value={formatRupiah(
-                                                obat_list.find(
-                                                    (o) =>
-                                                        o.id === item.obat_id,
-                                                )?.harga || 0,
-                                            )}
+                                            value={formatRupiah(item.harga)}
                                             readOnly
                                             className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600"
                                         />
                                     </div>
 
-                                    {/* Aturan Pakai */}
                                     <div className="md:col-span-3">
                                         <label className="mb-1 block text-sm font-medium text-gray-700">
                                             Aturan Pakai
@@ -209,7 +206,6 @@ export default function FormCreateResep({
                             </div>
                         ))}
 
-                        {/* Tambah Baris */}
                         <button
                             type="button"
                             onClick={tambahBaris}
@@ -219,12 +215,10 @@ export default function FormCreateResep({
                         </button>
                     </div>
 
-                    {/* Error Global */}
                     {errors.general && (
                         <p className="text-sm text-red-600">{errors.general}</p>
                     )}
 
-                    {/* Total Harga */}
                     <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
                         <div className="flex items-center gap-3">
                             <span className="text-sm font-medium text-gray-600">
@@ -243,8 +237,7 @@ export default function FormCreateResep({
                     </div>
                 </div>
 
-                {/* Tombol Aksi */}
-                <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                <div className="flex justify-end gap-3 rounded-b-xl border-t border-gray-200 bg-gray-50 px-6 py-4">
                     <Link
                         href={`/dokter/antrian/${pasien.id}/tangani`}
                         className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -252,40 +245,14 @@ export default function FormCreateResep({
                         Batal
                     </Link>
                     <button
-                        type="button"
+                        type="submit"
                         disabled={processing || resepObat.length === 0}
-                        onClick={() => setOpen(true)}
                         className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                     >
                         {processing ? 'Menyimpan...' : 'Simpan Resep'}
                     </button>
                 </div>
             </div>
-            <AlertDialog open={open} onOpenChange={setOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            Pastikan obat sudah benar
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Apakah Anda yakin obat yang dipilih sudah sesuai dan
-                            aturan pakainya sudah diisi dengan benar?
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => {
-                                setOpen(false);
-                                onConfirm();
-                            }}
-                            className="bg-emerald-600 hover:bg-emerald-700"
-                        >
-                            Yakin, simpan resep
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </>
+        </form>
     );
 }

@@ -1,7 +1,7 @@
+import { Highlight } from '@/components/ui/highlight';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import clsx from 'clsx';
 
 type Catatan = {
     id: number;
@@ -109,8 +109,16 @@ export default function CatatanLayananShowDokter({ catatan }: Props) {
                             label="Detail Keluhan"
                             value={catatan.detail_keluhan}
                         />
-                        <Highlight label="Diagnosa" value={catatan.diagnosa} className='mt-4' />
-                        <Highlight label="Tindakan" value={catatan.tindakan} className='mt-4'/>
+                        <Highlight
+                            label="Diagnosa"
+                            value={catatan.diagnosa}
+                            className="mt-4"
+                        />
+                        <Highlight
+                            label="Tindakan"
+                            value={catatan.tindakan}
+                            className="mt-4"
+                        />
                         <Section
                             label="Catatan Lain"
                             value={catatan.catatan_lain}
@@ -157,27 +165,6 @@ function Section({ label, value }: { label: string; value: string }) {
                 {label}
             </label>
             <div className="rounded-lg border bg-gray-50 px-4 py-2.5 text-sm text-gray-900">
-                {value || '-'}
-            </div>
-        </div>
-    );
-}
-
-function Highlight({
-    label,
-    value,
-    className,
-}: {
-    label: string;
-    value: string;
-    className?: string;
-}) {
-    return (
-        <div className={clsx(className)}>
-            <label className="mb-1 block text-sm font-semibold text-emerald-700">
-                {label}
-            </label>
-            <div className="rounded-lg border bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-900">
                 {value || '-'}
             </div>
         </div>

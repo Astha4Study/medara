@@ -9,6 +9,7 @@ use App\Http\Controllers\ApotekerKlinikController;
 use App\Http\Controllers\ApotekerObatController;
 use App\Http\Controllers\ApotekerPenyerahanObatController;
 use App\Http\Controllers\ApotekerResepController;
+use App\Http\Controllers\ApotekerResepDetailController;
 use App\Http\Controllers\ApotekerResepMasukController;
 use App\Http\Controllers\DokterAntrianController;
 use App\Http\Controllers\DokterCatatanLayananController;
@@ -21,16 +22,17 @@ use App\Http\Controllers\ResepsionisAntrianController;
 use App\Http\Controllers\ResepsionisKlinikController;
 use App\Http\Controllers\ResepsionisPasienController;
 use App\Http\Controllers\ResepsionisPembayaranController;
+use App\Http\Controllers\ResepsionisStoreAntrianAndPemeriksaanFisikController;
 use App\Http\Controllers\SuperAdminAddAdminController;
 use App\Http\Controllers\SuperAdminKlinikController;
 use App\Http\Controllers\SuperAdminPasienController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn() => Inertia::render('welcome'))->name('home');
+Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', fn() => Inertia::render('dashboard'))->name('dashboard');
+    Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
 
     Route::middleware(['auth', 'role:super_admin'])
         ->prefix('super-admin')
@@ -77,11 +79,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('antrian.createForPasien');
             Route::resource('antrian', ResepsionisAntrianController::class)
                 ->parameters(['antrian' => 'antrian'])
-                ->only(['index', 'store', 'edit', 'update', 'destroy']);
-            Route::get('pembayaran/{resep}/proses-bayar', [ResepsionisPembayaranController::class, 'create'])
+                ->only(['index', 'edit', 'update', 'destroy']);
+            Route::post(
+                'antrian/create/pasien/{pasien}',
+                [ResepsionisStoreAntrianAndPemeriksaanFisikController::class, 'store']
+            )->name('antrian.store');
+            Route::get('pembayaran/{resep}/proses-bayar', [ResepsionisPembayaranController::class, 'edit'])
                 ->name('pembayaran.proses-bayar');
-            Route::post('pembayaran/{resep}', [ResepsionisPembayaranController::class, 'store'])
-                ->name('pembayaran.store');
+            Route::put('pembayaran/{resep}', [ResepsionisPembayaranController::class, 'update'])
+                ->name('pembayaran.update');
             Route::get('pembayaran', [ResepsionisPembayaranController::class, 'index'])
                 ->name('pembayaran.index');
         });
@@ -93,7 +99,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('klinik', DokterKlinikController::class)
                 ->only(['index']);
             Route::resource('pasien', DokterPasienController::class)
-                ->parameters(['pasien' => 'pasien'])
                 ->only(['index', 'show']);
             Route::resource('antrian', DokterAntrianController::class)
                 ->parameters(['antrian' => 'antrian'])
@@ -136,8 +141,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('penyerahan-obat.edit');
             Route::patch('penyerahan-obat/{resep}', [ApotekerPenyerahanObatController::class, 'update'])
                 ->name('penyerahan-obat.update');
+            Route::post('resep-masuk/{resep}/detail', [ApotekerResepDetailController::class, 'store'])
+                ->name('resep-detail.store');
         });
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

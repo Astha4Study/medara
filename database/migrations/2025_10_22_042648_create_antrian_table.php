@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->foreignId('dokter_id')->nullable()->constrained('dokter')->onDelete('set null');
             $table->foreignId('klinik_id')->constrained('klinik')->onDelete('cascade');
             $table->text('keluhan')->nullable();
-            $table->enum('status', ['Menunggu', 'Sedang Diperiksa', 'Selesai'])->default('Menunggu');
+            $table->enum('status', ['Dibatalkan', 'Menunggu', 'Sedang Diperiksa', 'Selesai'])->default('Menunggu');
             $table->date('tanggal_kunjungan');
             $table->timestamps();
         });

@@ -43,14 +43,14 @@ class AdminAddResepsionisAndApotekerAndDoktorController extends Controller
     {
         $admin = Auth::user();
 
-        if (!$admin->klinik_id) {
+        if (! $admin->klinik_id) {
             return redirect('/admin/klinik')
                 ->with('error', 'Anda harus membuat fasilitas klinik terlebih dahulu sebelum menambahkan user.');
         }
 
         $klinik = $admin->klinik;
 
-        $availableRoles = ['resepsionis', 'dokter',];
+        $availableRoles = ['resepsionis', 'dokter'];
 
         if ($klinik && $klinik->punya_apoteker) {
             $availableRoles[] = 'apoteker';
@@ -70,11 +70,14 @@ class AdminAddResepsionisAndApotekerAndDoktorController extends Controller
         $role = $request->role;
 
         $validated = $request->validate([
-            'name' => 'required',
+            'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'nullable|string|min:8',
+            'role' => 'required|in:resepsionis,dokter,apoteker',
             'max_antrian_per_hari' => 'nullable|integer|min:1|max:50',
         ]);
+
+        $role = $validated['role'];
 
         $klinikId = $admin->klinik_id;
 
@@ -99,7 +102,7 @@ class AdminAddResepsionisAndApotekerAndDoktorController extends Controller
         }
 
         return redirect()->route('admin.users.index')
-            ->with('success', ucfirst($role) . ' berhasil ditambahkan.');
+            ->with('success', ucfirst($role).' berhasil ditambahkan.');
     }
 
     /**
@@ -142,11 +145,14 @@ class AdminAddResepsionisAndApotekerAndDoktorController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
             'password' => 'nullable|string|min:8',
+            'role' => 'required|in:resepsionis,dokter,apoteker',
             'max_antrian_per_hari' => 'nullable|integer|min:1|max:50',
         ]);
+
+        $role = $validated['role'];
 
         $user->update([
             'name' => $validated['name'],

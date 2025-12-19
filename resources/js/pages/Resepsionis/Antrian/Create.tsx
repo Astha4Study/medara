@@ -1,9 +1,11 @@
+import DataRingkasanPasienAntrian from '@/components/data-ringkasan-pasien-antrian';
 import FormCreateAntrian from '@/components/form-create-antrian';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
 import { toast } from 'sonner';
+import { route } from 'ziggy-js';
 
 interface Pasien {
     id: number;
@@ -15,38 +17,33 @@ interface Pasien {
     umur: number;
 }
 
-interface Dokter {
-    id: number;
-    name: string;
-}
-
-interface CreateProps {
+interface Props {
     pasien: Pasien;
-    dokter: Dokter[];
 }
 
 const today = new Date().toISOString().split('T')[0];
 
-export default function AntrianCreateResepsionis({ pasien }: CreateProps) {
+export default function AntrianCreateResepsionis({ pasien }: Props) {
     const { data, setData, post, processing, reset, errors } = useForm({
         pasien_id: pasien.id,
         keluhan: '',
+        berat_badan: 0,
+        tinggi_badan: 0,
+        suhu_tubuh: 0,
+        tekanan_darah: '',
+        kondisi_khusus: '',
         tanggal_kunjungan: today,
     });
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        post('/resepsionis/antrian', {
+        post(route('resepsionis.antrian.store', data.pasien_id), {
             onSuccess: () => {
                 reset();
-                toast.success('Berhasil!', {
-                    description: 'Antrian pasien berhasil dibuat.',
-                });
+                toast.success('Antrian pasien berhasil dibuat!');
             },
             onError: () => {
-                toast.error('Gagal!', {
-                    description: 'Terjadi kesalahan saat membuat antrian.',
-                });
+                toast.error('Terjadi kesalahan saat membuat antrian.');
             },
         });
     };
@@ -68,14 +65,18 @@ export default function AntrianCreateResepsionis({ pasien }: CreateProps) {
                         Lengkapi data untuk membuat antrian
                     </p>
                 </div>
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                    <FormCreateAntrian
+
+                <div className="space-y-6">
+                    <DataRingkasanPasienAntrian
                         pasien={pasien}
+                        tanggalKunjungan={data.tanggal_kunjungan}
+                    />
+
+                    <FormCreateAntrian
                         data={data}
                         setData={setData}
                         handleSubmit={handleSubmit}
                         processing={processing}
-                        errors={errors}
                     />
                 </div>
             </div>

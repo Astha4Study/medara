@@ -12,7 +12,7 @@ type ResepPembayaran = {
     dokter_nama: string;
     total_harga: number;
     status_pembayaran: string;
-    tanggal: string; // YYYY-MM-DD
+    tanggal: string;
 };
 
 type PageProps = { reseps: ResepPembayaran[] };
@@ -45,6 +45,24 @@ const formatTgl = (t: string) =>
         month: 'long',
         year: 'numeric',
     });
+
+const statusBadge: Record<
+    ResepPembayaran['status_pembayaran'] | 'pending' | 'belum_bayar' | 'lunas',
+    { label: string; className: string }
+> = {
+    pending: {
+        label: 'Menunggu Pembayaran',
+        className: 'bg-blue-100 text-blue-700',
+    },
+    belum_bayar: {
+        label: 'Belum Dibayar',
+        className: 'bg-yellow-100 text-yellow-700',
+    },
+    lunas: {
+        label: 'Sudah Dibayar',
+        className: 'bg-green-100 text-green-700',
+    },
+};
 
 export default function PenyerahanObatIndexApoteker() {
     const { reseps } = usePage<PageProps>().props;
@@ -120,19 +138,29 @@ export default function PenyerahanObatIndexApoteker() {
                                         <td className="px-6 py-4 font-semibold text-emerald-600">
                                             {formatRupiah(r.total_harga)}
                                         </td>
-                                        <td className="px-6 py-4 text-gray-700">
-                                            {r.status_pembayaran}
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${statusBadge[r.status_pembayaran]?.className}`}
+                                            >
+                                                {statusBadge[
+                                                    r.status_pembayaran
+                                                ]?.label ?? r.status_pembayaran}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 text-gray-700">
                                             {formatTgl(r.tanggal)}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <Link
-                                                href={`/apoteker/penyerahan-obat/${r.id}/serahkan`}
-                                                className="rounded-md bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
-                                            >
-                                                Serahkan Obat
-                                            </Link>
+                                            {i === 0 &&
+                                                r.status_pembayaran.toLowerCase() ===
+                                                    'lunas' && (
+                                                    <Link
+                                                        href={`/apoteker/penyerahan-obat/${r.id}/serahkan`}
+                                                        className="rounded-md bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
+                                                    >
+                                                        Serahkan Obat
+                                                    </Link>
+                                                )}
                                         </td>
                                     </tr>
                                 ))

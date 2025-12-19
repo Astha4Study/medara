@@ -3,13 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Antrian;
-use App\Models\CatatanLayanan;
 use App\Models\Obat;
-use App\Models\Resep;
-use App\Models\ResepDetail;
+use App\Models\PemeriksaanFisik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DokterResepController extends Controller
@@ -25,7 +22,7 @@ class DokterResepController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request, Antrian $antrian)
+    public function create(Antrian $antrian)
     {
         if (!Auth::check()) {
             abort(401, 'Unauthorized');
@@ -41,15 +38,37 @@ class DokterResepController extends Controller
             abort(403, 'Anda tidak berwenang menangani antrian ini.');
         }
 
-        $obat = Obat::where('klinik_id', $antrian->klinik_id)->get();
+        // Load relasi yang memang ada
+        $antrian->load(['pasien', 'klinik']);
+        $pemeriksaanFisik = PemeriksaanFisik::where('pasien_id', $antrian->pasien_id)
+            ->where('klinik_id', $antrian->klinik_id)
+            ->orderByDesc('created_at')
+            ->first();
 
         return Inertia::render('Dokter/Resep/Create', [
-            'antrian' => $antrian,
-            'pasien' => $antrian->pasien,
-            'obat_list' => $obat,
-            'catatan' => $request->all(),
+            'pasien' => [
+                'id' => $antrian->pasien->id,
+                'nama_lengkap' => $antrian->pasien->nama_lengkap,
+                'nomor_pasien' => $antrian->pasien->nomor_pasien,
+                'tanggal_lahir' => $antrian->pasien->tanggal_lahir,
+                'golongan_darah' => $antrian->pasien->golongan_darah,
+                'riwayat_penyakit' => $antrian->pasien->riwayat_penyakit,
+                'alergi' => $antrian->pasien->alergi,
+            ],
+
+            'pemeriksaan_fisik' => $pemeriksaanFisik
+                ? [
+                    'berat_badan' => $pemeriksaanFisik->berat_badan,
+                    'tinggi_badan' => $pemeriksaanFisik->tinggi_badan,
+                    'suhu_tubuh' => $pemeriksaanFisik->suhu_tubuh,
+                    'tekanan_darah' => $pemeriksaanFisik->tekanan_darah,
+                    'kondisi_khusus' => $pemeriksaanFisik->kondisi_khusus,
+                ]
+                : null,
         ]);
     }
+
+
 
     /**
      * Store a newly created resource in storage.

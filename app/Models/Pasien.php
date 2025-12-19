@@ -48,6 +48,11 @@ class Pasien extends Model
             : '-';
     }
 
+    public function pemeriksaanFisik()
+    {
+        return $this->hasOne(PemeriksaanFisik::class);
+    }
+
     public function klinik()
     {
         return $this->belongsTo(Klinik::class);
@@ -69,11 +74,11 @@ class Pasien extends Model
 
             $klinik = Klinik::find($pasien->klinik_id);
 
-            if (!$klinik) {
+            if (! $klinik) {
                 throw new \Exception('Klinik tidak ditemukan, nomor pasien gagal dibuat.');
             }
 
-            if (!$klinik->kode_klinik) {
+            if (! $klinik->kode_klinik) {
                 throw new \Exception('Kode klinik belum diisi, nomor pasien gagal dibuat.');
             }
 
@@ -86,7 +91,7 @@ class Pasien extends Model
             $next = $last ? (int) substr($last->nomor_pasien, -4) + 1 : 1;
 
             $pasien->nomor_pasien =
-                $klinik->kode_klinik . '-' . now()->format('Ymd') . '-' .
+                $klinik->kode_klinik.'-'.now()->format('Ymd').'-'.
                 str_pad($next, 4, '0', STR_PAD_LEFT);
         });
     }

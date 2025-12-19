@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Obat;
 use App\Models\Pembayaran;
 use App\Models\Resep;
 use Illuminate\Http\Request;
@@ -17,9 +18,13 @@ class ApotekerResepMasukController extends Controller
     {
         $user = Auth::user();
 
+        if (!$user->hasRole('apoteker')) {
+            abort(403, 'Hanya apoteker yang boleh mengakses halaman ini.');
+        }
+
         $resep = Resep::with([
             'pasien:id,nama_lengkap,nomor_pasien',
-            'dokter:id,name',
+            'dokter.user:id,name',
         ])
             ->where('klinik_id', $user->klinik_id)
             ->whereIn('status', ['pending', 'sedang_dibuat'])
@@ -29,7 +34,7 @@ class ApotekerResepMasukController extends Controller
                 'id' => $item->id,
                 'pasien_nama' => $item->pasien->nama_lengkap,
                 'nomor_pasien' => $item->pasien->nomor_pasien,
-                'dokter_nama' => $item->dokter->name ?? '-',
+                'dokter_nama' => $item->dokter?->user?->name ?? '-',
                 'status' => $item->status,
                 'total_harga' => $item->total_harga,
                 'created_at' => $item->created_at->toISOString(),
@@ -71,10 +76,15 @@ class ApotekerResepMasukController extends Controller
     {
         $resep = Resep::with([
             'pasien:id,nama_lengkap,nomor_pasien,nik,riwayat_penyakit',
-            'dokter:id,name',
+            'pasien.pemeriksaanFisik',
             'catatanLayanan:id,diagnosa',
             'resepDetail.obat:id,nama_obat,satuan,harga',
         ])->findOrFail($id);
+
+        $obatMaster = Obat::where('klinik_id', $resep->klinik_id)
+            ->select('id', 'nama_obat', 'jenis_obat', 'satuan', 'harga', 'penggunaan_obat')
+            ->orderBy('nama_obat')
+            ->get();
 
         return Inertia::render('Apoteker/ResepMasuk/Edit', [
             'resep' => [
@@ -82,28 +92,36 @@ class ApotekerResepMasukController extends Controller
                 'status' => $resep->status,
                 'total_harga' => $resep->total_harga,
 
+                'resep_teks' => $resep->resep_teks,
+
                 'pasien' => [
                     'nama_lengkap' => $resep->pasien->nama_lengkap,
                     'nomor_pasien' => $resep->pasien->nomor_pasien,
-                    'nik' => $resep->pasien->nik,
                     'riwayat_penyakit' => $resep->pasien->riwayat_penyakit,
-                ],
-
-                'dokter' => [
-                    'nama' => $resep->dokter->name ?? '-',
                 ],
 
                 'diagnosa' => $resep->catatanLayanan->diagnosa ?? '-',
 
+                'pemeriksaan_fisik' => [
+                    'berat_badan' => $resep->pasien->pemeriksaanFisik->berat_badan ?? null,
+                    'tinggi_badan' => $resep->pasien->pemeriksaanFisik->tinggi_badan ?? null,
+                    'suhu_tubuh' => $resep->pasien->pemeriksaanFisik->suhu_tubuh ?? null,
+                    'tekanan_darah' => $resep->pasien->pemeriksaanFisik->tekanan_darah ?? null,
+                    'kondisi_khusus' => $resep->pasien->pemeriksaanFisik->kondisi_khusus ?? null,
+                ],
+
                 'detail' => $resep->resepDetail->map(fn($d) => [
-                    'id' => $d->id,
+                    'obat_id' => $d->obat->id,
                     'nama_obat' => $d->obat->nama_obat,
                     'jumlah' => $d->jumlah,
                     'satuan' => $d->obat->satuan,
                     'harga' => $d->obat->harga,
+                    'penggunaan_obat' => $d->obat->penggunaan_obat,
                     'subtotal' => $d->jumlah * $d->obat->harga,
                 ]),
             ],
+
+            'obatMaster' => $obatMaster,
         ]);
     }
 

@@ -1,35 +1,32 @@
 import { create } from 'zustand';
 
-type ObatItem = {
+type Obat = {
     obat_id: number;
     nama_obat: string;
     jumlah: number;
+    satuan: string;
+    harga: number;
     penggunaan_obat: string;
+    subtotal?: number;
 };
 
-type ResepStore = {
-    obat_list: ObatItem[];
-    tambahObat: (item: ObatItem) => void;
-    updateObat: (index: number, key: keyof ObatItem, value: any) => void;
-    hapusObat: (index: number) => void;
+type ResepState = {
+    obatList: Obat[];
+    tambahObat: (obat: Obat) => void;
     reset: () => void;
+    totalHarga: () => number;
 };
 
-const initial: ObatItem[] = [];
-
-export const useResepStore = create<ResepStore>((set) => ({
-    obat_list: initial,
-    tambahObat: (item) =>
-        set((state) => ({ obat_list: [...state.obat_list, item] })),
-    updateObat: (index, key, value) =>
+export const useResepStore = create<ResepState>((set, get) => ({
+    obatList: [],
+    tambahObat: (obat) =>
         set((state) => ({
-            obat_list: state.obat_list.map((o, i) =>
-                i === index ? { ...o, [key]: value } : o,
-            ),
+            obatList: [
+                ...state.obatList,
+                { ...obat, subtotal: obat.jumlah * obat.harga },
+            ],
         })),
-    hapusObat: (index) =>
-        set((state) => ({
-            obat_list: state.obat_list.filter((_, i) => i !== index),
-        })),
-    reset: () => set({ obat_list: initial }),
+    reset: () => set({ obatList: [] }),
+    totalHarga: () =>
+        get().obatList.reduce((acc, curr) => acc + (curr.subtotal ?? 0), 0),
 }));

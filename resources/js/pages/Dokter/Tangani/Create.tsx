@@ -1,4 +1,6 @@
-import FormCreateCatatanLayanan from '@/components/form-create-catatan-layanan';
+import DataPasienTangani from '@/components/data-pasien-tangani';
+import DataPemeriksaanFisik from '@/components/data-pemeriksaan-fisik';
+import FormCreateCatatanLayananDokter from '@/components/form-create-catatan-layanan-dokter';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -40,10 +42,20 @@ type Antrian = {
     tanggal_kunjungan?: string;
 };
 
+type PemeriksaanFisik = {
+    id: number;
+    berat_badan: number | null;
+    tinggi_badan: number | null;
+    suhu_tubuh: number | null;
+    tekanan_darah: string | null;
+    kondisi_khusus: string | null;
+};
+
 type Props = {
     pasien: Pasien;
     klinik: Klinik;
     antrian: Antrian;
+    pemeriksaan_fisik: PemeriksaanFisik;
     punya_server: number;
 };
 
@@ -52,6 +64,7 @@ export default function TindakanCreateDokter({
     klinik,
     antrian,
     punya_server,
+    pemeriksaan_fisik,
 }: Props) {
     const {
         data,
@@ -66,15 +79,15 @@ export default function TindakanCreateDokter({
 
     useEffect(() => {
         reset();
+    }, []);
+
+    useEffect(() => {
         setData('antrian_id', antrian.id);
         setData('pasien_id', pasien.id);
         setData('klinik_id', klinik.id);
+        setData('pemeriksaan_fisik_id', pemeriksaan_fisik?.id);
         setData('keluhan_utama', antrian.keluhan ?? '');
-    }, [antrian.id, pasien.id, klinik.id]);
-
-    useEffect(() => {
-        setData('keluhan_utama', antrian.keluhan || '');
-    }, [antrian.id]);
+    }, [antrian.id, pasien.id, klinik.id, pemeriksaan_fisik?.id]);
 
     useEffect(() => {
         setProcessing(false);
@@ -86,27 +99,33 @@ export default function TindakanCreateDokter({
         setErrors({});
         setProcessing(true);
 
-        if (
-            !String(data.detail_keluhan || '').trim() ||
-            !String(data.diagnosa || '').trim() ||
-            !String(data.tindakan || '').trim()
-        ) {
-            const errs = {
-                general: 'Detail keluhan, diagnosa, dan tindakan wajib diisi.',
-            };
-            setErrors(errs);
-            toast.error(errs.general);
+        /* validasi hanya bila punya server */
+        if (punya_server === 1) {
+            if (
+                !String(data.detail_keluhan || '').trim() ||
+                !String(data.diagnosa || '').trim() ||
+                !String(data.tindakan || '').trim()
+            ) {
+                setErrors({
+                    detail_keluhan: 'Wajib diisi',
+                    diagnosa: 'Wajib diisi',
+                    tindakan: 'Wajib diisi',
+                });
+                toast.error('Lengkapi data rekam medis terlebih dahulu');
+                setProcessing(false);
+                return;
+            }
+
+            setConfirmOpen(true);
             setProcessing(false);
             return;
         }
 
-        setConfirmOpen(true);
-        setProcessing(false);
+        router.visit(`/dokter/antrian/${antrian.id}/resep/create`);
     };
 
     const confirmAndSend = () => {
         setProcessing(true);
-
         router.visit(`/dokter/antrian/${antrian.id}/resep/create`);
     };
 
@@ -128,9 +147,14 @@ export default function TindakanCreateDokter({
                     </p>
                 </div>
 
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                    <FormCreateCatatanLayanan
-                        pasien={pasien}
+                <div className="space-y-6">
+                    <DataPasienTangani pasien={pasien} />
+
+                    <DataPemeriksaanFisik
+                        pemeriksaanFisik={pemeriksaan_fisik}
+                    />
+
+                    <FormCreateCatatanLayananDokter
                         punyaServer={punya_server}
                         data={data}
                         setData={setData}

@@ -57,6 +57,7 @@ class AdminKlinikController extends Controller
         ]);
 
         $validated['created_by'] = $user->id;
+        $validated['punya_apoteker'] = true;
 
         if ($request->hasFile('gambar')) {
             $validated['gambar'] = $request->file('gambar')->store('klinik', 'public');

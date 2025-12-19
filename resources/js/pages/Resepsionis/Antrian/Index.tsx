@@ -1,7 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 type Antrian = {
     id: number;
@@ -22,10 +23,11 @@ const listTable = [
     'No Antrian',
     'Nomor Pasien',
     'Nama Pasien',
-    'Nama Dokter',
+    'Penanggung Jawab',
     'Keluhan',
-    'Tanggal Dibuat',
     'Status',
+    'Tanggal Dibuat',
+    'Aksi',
 ];
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -106,6 +108,21 @@ export default function AntrianIndexResepsionis() {
                                                     : '-'}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
+                                                <span
+                                                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                                        item.status ===
+                                                        'Menunggu'
+                                                            ? 'bg-yellow-100 text-yellow-700'
+                                                            : item.status ===
+                                                                'Diproses'
+                                                              ? 'bg-blue-100 text-blue-700'
+                                                              : 'bg-green-100 text-green-700'
+                                                    }`}
+                                                >
+                                                    {item.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-700">
                                                 {item.created_at
                                                     ? new Date(
                                                           item.created_at,
@@ -120,19 +137,34 @@ export default function AntrianIndexResepsionis() {
                                                     : '-'}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                <span
-                                                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                                        item.status ===
-                                                        'Menunggu'
-                                                            ? 'bg-yellow-100 text-yellow-700'
-                                                            : item.status ===
-                                                                'Diproses'
-                                                              ? 'bg-blue-100 text-blue-700'
-                                                              : 'bg-green-100 text-green-700'
-                                                    }`}
+                                                <button
+                                                    onClick={() => {
+                                                        if (
+                                                            confirm(
+                                                                'Yakin membatalkan antrian ini?',
+                                                            )
+                                                        ) {
+                                                            router.prefetch(
+                                                                `/resepsionis/antrian/${item.id}`,
+                                                                {
+                                                                    onSuccess:
+                                                                        () =>
+                                                                            toast.success(
+                                                                                'Antrian dibatalkan',
+                                                                            ),
+                                                                    onError:
+                                                                        () =>
+                                                                            toast.error(
+                                                                                'Gagal membatalkan',
+                                                                            ),
+                                                                },
+                                                            );
+                                                        }
+                                                    }}
+                                                    className="rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
                                                 >
-                                                    {item.status}
-                                                </span>
+                                                    Batalkan
+                                                </button>
                                             </td>
                                         </tr>
                                     ))

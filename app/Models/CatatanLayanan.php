@@ -13,6 +13,7 @@ class CatatanLayanan extends Model
 
     protected $fillable = [
         'sumber_input',
+        'pemeriksaan_fisik_id',
         'pasien_id',
         'klinik_id',
         'dokter_id',
@@ -49,6 +50,11 @@ class CatatanLayanan extends Model
     public function antrian()
     {
         return $this->belongsTo(Antrian::class, 'antrian_id');
+    }
+
+    public function pemeriksaanFisik()
+    {
+        return $this->belongsTo(PemeriksaanFisik::class, 'pemeriksaan_fisik_id');
     }
 
 }

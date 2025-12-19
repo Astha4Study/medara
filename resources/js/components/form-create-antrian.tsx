@@ -1,172 +1,161 @@
 import { Link } from '@inertiajs/react';
-import React from 'react';
 
-interface Pasien {
-    id: number;
-    nama_lengkap: string;
-    golongan_darah: string;
-    riwayat_penyakit: string;
-    alergi: string;
-    jenis_kelamin: string;
-    umur: number;
-}
-
-interface FormCreateAntrianProps {
-    pasien: Pasien;
-    data: {
-        pasien_id: number;
-        keluhan: string;
-        tanggal_kunjungan: string;
-    };
+type Props = {
+    data: any;
     setData: (key: string, value: any) => void;
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     processing: boolean;
-    errors: Record<string, string>;
-}
+};
 
-const FormCreateAntrian: React.FC<FormCreateAntrianProps> = ({
-    pasien,
+const FormCreateAntrian = ({
     data,
     setData,
     handleSubmit,
     processing,
-    errors,
-}) => {
+}: Props) => {
     return (
-        <form onSubmit={handleSubmit} autoComplete="off">
-            <div className="p-6">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    {/* Info Pasien */}
+        <form
+            onSubmit={handleSubmit}
+            className="overflow-hidden rounded-lg border border-gray-200 bg-white"
+        >
+            <div className="space-y-6 p-6">
+                {/* Keluhan (Opsional) */}
+                <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Keluhan
+                    </label>
+                    <textarea
+                        value={data.keluhan}
+                        onChange={(e) => setData('keluhan', e.target.value)}
+                        rows={3}
+                        placeholder="Masukkan keluhan utama pasien (opsional)"
+                        className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                </div>
+
+                {/* Pemeriksaan Fisik */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {/* Berat Badan (WAJIB) */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Nama Pasien
+                            Berat Badan <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            type="text"
-                            value={pasien.nama_lengkap}
-                            disabled
-                            className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-600"
-                        />
+                        <div className="relative">
+                            <input
+                                type="number"
+                                required
+                                placeholder="Contoh: 65"
+                                value={data.berat_badan || ''}
+                                onChange={(e) =>
+                                    setData('berat_badan', e.target.value)
+                                }
+                                className="w-full rounded-lg border px-4 py-2.5 pr-10 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                            />
+                            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-500">
+                                kg
+                            </span>
+                        </div>
                     </div>
 
+                    {/* Tinggi Badan (Opsional) */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Golongan Darah
+                            Tinggi Badan
                         </label>
-                        <input
-                            type="text"
-                            value={pasien.golongan_darah}
-                            disabled
-                            className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-600"
-                        />
+                        <div className="relative">
+                            <input
+                                type="number"
+                                placeholder="Contoh: 170"
+                                value={data.tinggi_badan || ''}
+                                onChange={(e) =>
+                                    setData('tinggi_badan', e.target.value)
+                                }
+                                className="w-full rounded-lg border px-4 py-2.5 pr-10 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                            />
+                            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-500">
+                                cm
+                            </span>
+                        </div>
                     </div>
 
+                    {/* Suhu Tubuh (Opsional) */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Riwayat Penyakit
+                            Suhu Tubuh
                         </label>
-                        <input
-                            type="text"
-                            value={pasien.riwayat_penyakit}
-                            disabled
-                            className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-600"
-                        />
+                        <div className="relative">
+                            <input
+                                type="number"
+                                step="0.1"
+                                placeholder="Contoh: 36.5"
+                                value={data.suhu_tubuh || ''}
+                                onChange={(e) =>
+                                    setData('suhu_tubuh', e.target.value)
+                                }
+                                className="w-full rounded-lg border px-4 py-2.5 pr-10 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                            />
+                            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-500">
+                                °C
+                            </span>
+                        </div>
                     </div>
 
+                    {/* Tekanan Darah (WAJIB) */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Alergi
-                        </label>
-                        <input
-                            type="text"
-                            value={pasien.alergi}
-                            disabled
-                            className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-600"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Jenis Kelamin
-                        </label>
-                        <input
-                            type="text"
-                            value={
-                                pasien.jenis_kelamin === 'L'
-                                    ? 'Laki-laki'
-                                    : 'Perempuan'
-                            }
-                            disabled
-                            className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-600"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Umur Pasien
-                        </label>
-                        <input
-                            type="text"
-                            value={`${pasien.umur} Tahun`}
-                            disabled
-                            className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-600"
-                        />
-                    </div>
-
-                    {/* Tanggal Kunjungan */}
-                    <div className="md:col-span-2">
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Tanggal Kunjungan{' '}
+                            Tekanan Darah{' '}
                             <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            type="date"
-                            name="tanggal_kunjungan"
-                            value={data.tanggal_kunjungan}
-                            disabled
-                            className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm"
-                        />
-                        {errors.tanggal_kunjungan && (
-                            <p className="mt-1 text-sm text-red-600">
-                                {errors.tanggal_kunjungan}
-                            </p>
-                        )}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                required
+                                placeholder="Contoh: 120/80"
+                                value={data.tekanan_darah || ''}
+                                onChange={(e) =>
+                                    setData(
+                                        'tekanan_darah',
+                                        e.target.value.replace(/[^0-9/]/g, ''),
+                                    )
+                                }
+                                className="w-full rounded-lg border px-4 py-2.5 pr-14 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                            />
+                            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-500">
+                                mmHg
+                            </span>
+                        </div>
                     </div>
 
-                    {/* Keluhan */}
+                    {/* Kondisi Khusus (Opsional) */}
                     <div className="md:col-span-2">
                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Keluhan
+                            Kondisi Khusus
                         </label>
                         <textarea
-                            name="keluhan"
-                            value={data.keluhan}
-                            onChange={(e) => setData('keluhan', e.target.value)}
-                            rows={3}
-                            placeholder="Tuliskan keluhan pasien..."
-                            className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
+                            rows={2}
+                            placeholder="Contoh: Alergi obat, asma, hamil, dll (opsional)"
+                            value={data.kondisi_khusus || ''}
+                            onChange={(e) =>
+                                setData('kondisi_khusus', e.target.value)
+                            }
+                            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-emerald-500"
                         />
-                        {errors.keluhan && (
-                            <p className="mt-1 text-sm text-red-600">
-                                {errors.keluhan}
-                            </p>
-                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Tombol Aksi */}
-            <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+            {/* Action */}
+            <div className="flex justify-end gap-3 border-t bg-gray-50 px-6 py-4">
                 <Link
                     href="/resepsionis/antrian"
-                    className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="rounded-lg border px-4 py-2.5 text-sm"
                 >
                     Batal
                 </Link>
                 <button
                     type="submit"
                     disabled={processing}
-                    className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                    className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm text-white hover:bg-emerald-700 disabled:opacity-60"
                 >
                     {processing ? 'Menyimpan...' : 'Simpan Antrian'}
                 </button>

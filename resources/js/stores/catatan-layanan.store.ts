@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 
 type CatatanForm = {
     antrian_id: number;
+    pemeriksaan_fisik_id: number;
     pasien_id: number;
     klinik_id: number;
     keluhan_utama: string;
@@ -31,6 +32,7 @@ type Store = PersistedSlice & TransientSlice & Actions;
 
 const initial: CatatanForm = {
     antrian_id: 0,
+    pemeriksaan_fisik_id: 0,
     pasien_id: 0,
     klinik_id: 0,
     keluhan_utama: '',

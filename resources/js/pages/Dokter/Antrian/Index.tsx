@@ -24,8 +24,8 @@ const listTable = [
     'No Pasien',
     'Nama Pasien',
     'Keluhan',
-    'Tanggal Dibuat',
     'Status',
+    'Tanggal Dibuat',
     'Aksi',
 ];
 
@@ -103,21 +103,6 @@ export default function AntrianIndexDokter() {
                                             </td>
 
                                             <td className="px-6 py-4 text-gray-700">
-                                                {item.created_at
-                                                    ? new Date(
-                                                          item.created_at,
-                                                      ).toLocaleDateString(
-                                                          'id-ID',
-                                                          {
-                                                              day: '2-digit',
-                                                              month: 'long',
-                                                              year: 'numeric',
-                                                          },
-                                                      )
-                                                    : '-'}
-                                            </td>
-
-                                            <td className="px-6 py-4 text-gray-700">
                                                 <span
                                                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                                                         item.status ===
@@ -131,6 +116,21 @@ export default function AntrianIndexDokter() {
                                                 >
                                                     {item.status}
                                                 </span>
+                                            </td>
+
+                                            <td className="px-6 py-4 text-gray-700">
+                                                {item.created_at
+                                                    ? new Date(
+                                                          item.created_at,
+                                                      ).toLocaleDateString(
+                                                          'id-ID',
+                                                          {
+                                                              day: '2-digit',
+                                                              month: 'long',
+                                                              year: 'numeric',
+                                                          },
+                                                      )
+                                                    : '-'}
                                             </td>
 
                                             <td className="px-6 py-4 text-gray-700">

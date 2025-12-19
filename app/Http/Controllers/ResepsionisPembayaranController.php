@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pembayaran;
 use App\Models\Resep;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -17,10 +18,11 @@ class ResepsionisPembayaranController extends Controller
     {
         $pembayarans = Pembayaran::with([
             'resep.pasien:id,nama_lengkap,nomor_pasien',
-            'resep.dokter:id,name',
+            'resep.dokter.user:id,name',
         ])
             ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
+            ->where('klinik_id', auth()->user()->klinik_id)
+            ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($pembayaran) {
                 $resep = $pembayaran->resep;
@@ -30,10 +32,13 @@ class ResepsionisPembayaranController extends Controller
                     'nomor_resep' => 'RSP-' . str_pad($resep->id, 6, '0', STR_PAD_LEFT),
                     'nomor_pasien' => $resep->pasien->nomor_pasien ?? '-',
                     'pasien_nama' => $resep->pasien->nama_lengkap ?? '-',
-                    'dokter_nama' => $resep->dokter->name ?? '-',
+                    'dokter_nama' => $resep->dokter->user->name ?? '-',
                     'total_harga' => $resep->total_harga,
                     'status_pembayaran' => $pembayaran->status,
-                    'tanggal' => $pembayaran->created_at->format('d F Y'),
+
+                    'tanggal' => $pembayaran->created_at->toISOString(),
+
+                    'tanggal_label' => $pembayaran->created_at->format('d F Y'),
                 ];
             });
 
@@ -42,20 +47,60 @@ class ResepsionisPembayaranController extends Controller
         ]);
     }
 
+
     /**
      * Show the form for creating a new resource.
      */
     public function create($id)
     {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $allowedResep = Pembayaran::with('resep')
+            ->where('status', 'pending')
+            ->where('klinik_id', auth()->user()->klinik_id)
+            ->where('resep_id', $id)
+            ->orderBy('created_at', 'asc')
+            ->first();
+
+        if (!$allowedResep) {
+            abort(403, 'Tidak ada pembayaran yang dapat diproses.');
+        }
+
+        if ($allowedResep->resep_id != $id) {
+            abort(403, 'Resep ini belum bisa diproses.');
+        }
+
         $resep = Resep::with([
             'pasien:id,nama_lengkap,nomor_pasien,nik,riwayat_penyakit',
-            'dokter:id,name',
+            'dokter.user:id,name',
             'resepDetail:id,resep_id,obat_id,jumlah,harga_satuan',
             'resepDetail.obat:id,nama_obat,satuan,harga',
             'catatanLayanan:id,diagnosa',
         ])->findOrFail($id);
 
-        return Inertia::render('Resepsionis/Pembayaran/Create', [
+        return Inertia::render('Resepsionis/Pembayaran/Edit', [
             'resep' => [
                 'id' => $resep->id,
                 'total_harga' => $resep->total_harga,
@@ -68,7 +113,7 @@ class ResepsionisPembayaranController extends Controller
                     'riwayat_penyakit' => $resep->pasien->riwayat_penyakit,
                 ],
                 'dokter' => [
-                    'nama' => $resep->dokter->name ?? '-',
+                    'nama' => $resep->dokter->user->name ?? '-',
                 ],
                 'detail' => $resep->resepDetail->map(fn($d) => [
                     'id' => $d->id,
@@ -82,10 +127,11 @@ class ResepsionisPembayaranController extends Controller
         ]);
     }
 
+
     /**
-     * Store a newly created resource in storage.
+     * Update the specified resource in storage.
      */
-    public function store(Request $request, $id)
+    public function update(Request $request, string $id)
     {
         $request->validate([
             'uang_dibayar' => 'required|numeric|min:0',
@@ -106,25 +152,29 @@ class ResepsionisPembayaranController extends Controller
 
             $kembalian = $uang - $total;
 
-            // 1. Pembayaran utama
-            $pembayaran = Pembayaran::create([
-                'resep_id' => $resep->id,
-                'resepsionis_id' => auth()->id(),
+            // ✅ Ambil pembayaran yang sudah ada (status pending)
+            $pembayaran = Pembayaran::where('resep_id', $resep->id)
+                ->where('status', 'pending')
+                ->firstOrFail();
+
+            $resepsionisId = auth()->user()->id;
+
+            // Update pembayaran utama
+            $pembayaran->update([
+                'resepsionis_id' => $resepsionisId,
                 'total_bayar' => $total,
                 'status' => 'lunas',
             ]);
 
-            // 2. Detail pembayaran
-            $pembayaran->detail()->create([
-                'uang_dibayar' => $uang,
-                'kembalian' => $kembalian,
-                'metode_pembayaran' => $request->metode_pembayaran ?? 'cash',
-            ]);
-
-            // 3. Update pembayaran
-            $pembayaran->update([
-                'status' => 'lunas',
-            ]);
+            // Update / buat detail pembayaran
+            $pembayaran->detail()->updateOrCreate(
+                ['pembayaran_id' => $pembayaran->id],
+                [
+                    'uang_dibayar' => $uang,
+                    'kembalian' => $kembalian,
+                    'metode_pembayaran' => $request->metode_pembayaran ?? 'cash',
+                ]
+            );
 
             return redirect()
                 ->route('resepsionis.pembayaran.index')
@@ -136,29 +186,6 @@ class ResepsionisPembayaranController extends Controller
         });
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
 
     /**
      * Remove the specified resource from storage.

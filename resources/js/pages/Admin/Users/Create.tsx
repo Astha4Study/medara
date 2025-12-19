@@ -22,15 +22,15 @@ export default function UsersCreateAdmin() {
         e.preventDefault();
         post('/admin/tambah-user', {
             onSuccess: () => {
-                toast.success('User berhasil ditambahkan', {
-                    description: 'Data user baru telah disimpan ke sistem.',
-                });
+                const roleLabel = data.role
+                    ? data.role.charAt(0).toUpperCase() + data.role.slice(1)
+                    : 'User';
+
+                toast.success(`${roleLabel} berhasil ditambahkan`);
                 reset();
             },
             onError: () => {
-                toast.error('Gagal menambahkan user', {
-                    description: 'Terjadi kesalahan saat menyimpan data user.',
-                });
+                toast.error('Gagal menambahkan user');
             },
         });
     };
