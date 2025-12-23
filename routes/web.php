@@ -31,7 +31,7 @@ use App\Http\Controllers\SuperAdminPasienController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn() => Inertia::render('welcome'))->name('home');
+Route::get('/', fn() => Inertia::render('Landing/Index'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', fn() => Inertia::render('dashboard'))->name('dashboard');
