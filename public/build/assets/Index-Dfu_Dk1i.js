@@ -1,0 +1,1 @@
+import{j as o}from"./app-DPU-5xaA.js";import{L as t,H as i,N as a}from"./near-location-DHgnBVZq.js";import"./app-BZ19I5NX.js";import"./index-4Ns3tNZl.js";import"./search-D0rQAU-J.js";import"./utils-C8uvsPt5.js";import"./x-DTHQ_Ru-.js";import"./sun-BlQU4HUC.js";function u({kliniks:r}){return o.jsxs(t,{children:[o.jsx(i,{}),o.jsx(a,{kliniks:r})]})}export{u as default};
