@@ -149,68 +149,71 @@ class ResepsionisPembayaranController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-{
-    $request->validate([
-        'uang_dibayar' => 'required|numeric|min:0',
-        'metode_pembayaran' => 'nullable|string',
-    ]);
-
-    return DB::transaction(function () use ($request, $id) {
-
-        $pembayaran = Pembayaran::with([
-            'resep.resepDetail',
-            'catatanLayanan.detail.layanan',
-        ])
-            ->lockForUpdate()
-            ->where('status', 'pending')
-            ->where('klinik_id', auth()->user()->klinik_id)
-            ->findOrFail($id);
-
-        // Hitung ulang total dari resep dan layanan
-        $totalResep = $pembayaran->resep_id
-            ? $pembayaran->resep->resepDetail->sum(fn ($d) => $d->jumlah * $d->harga_satuan)
-            : 0;
-
-        $totalLayanan = $pembayaran->catatan_layanan_id
-            ? $pembayaran->catatanLayanan->detail->sum(fn ($d) => $d->layanan->harga)
-            : 0;
-
-        $total = $totalResep + $totalLayanan;
-
-        $uang = $request->uang_dibayar;
-
-        if ($uang < $total) {
-            return back()->withErrors([
-                'uang_dibayar' => 'Uang yang dibayarkan kurang dari total harga.',
-            ]);
-        }
-
-        $kembalian = $uang - $total;
-
-        $pembayaran->update([
-            'resepsionis_id' => auth()->id(),
-            'status' => 'lunas',
-            'total_bayar' => $total, 
+    {
+        $request->validate([
+            'uang_dibayar' => 'required|numeric|min:0',
+            'metode_pembayaran' => 'nullable|string',
         ]);
 
-        $pembayaran->detail()->updateOrCreate(
-            ['pembayaran_id' => $pembayaran->id],
-            [
-                'uang_dibayar'      => $uang,
-                'kembalian'         => $kembalian,
-                'metode_pembayaran' => $request->metode_pembayaran ?? 'cash',
-            ]
-        );
+        return DB::transaction(function () use ($request, $id) {
 
-        return redirect()
-            ->route('resepsionis.pembayaran.index')
-            ->with(
-                'success',
-                'Pembayaran berhasil. Kembalian: Rp ' .
-                number_format($kembalian, 0, ',', '.')
+            $pembayaran = Pembayaran::with([
+                'resep.resepDetail',
+                'catatanLayanan.detail.layanan',
+            ])
+                ->lockForUpdate()
+                ->where('status', 'pending')
+                ->where('klinik_id', auth()->user()->klinik_id)
+                ->findOrFail($id);
+
+            // Hitung ulang total dari resep dan layanan
+            $totalResep = $pembayaran->resep_id
+                ? $pembayaran->resep->resepDetail->sum(fn ($d) => $d->jumlah * $d->harga_satuan)
+                : 0;
+
+            $totalLayanan = $pembayaran->catatan_layanan_id
+                ? $pembayaran->catatanLayanan->detail->sum(fn ($d) => $d->layanan->harga)
+                : 0;
+
+            $total = $totalResep + $totalLayanan;
+
+            $uang = $request->uang_dibayar;
+
+            if ($uang < $total) {
+                return back()->withErrors([
+                    'uang_dibayar' => 'Uang yang dibayarkan kurang dari total harga.',
+                ]);
+            }
+
+            $kembalian = $uang - $total;
+
+            // Tentukan status berdasarkan ada/tidaknya resep_id
+            $status = $pembayaran->resep_id ? 'lunas' : 'selesai';
+
+            $pembayaran->update([
+                'resepsionis_id' => auth()->id(),
+                'status' => $status,
+                'total_bayar' => $total,
+            ]);
+
+            $pembayaran->detail()->updateOrCreate(
+                ['pembayaran_id' => $pembayaran->id],
+                [
+                    'uang_dibayar' => $uang,
+                    'kembalian' => $kembalian,
+                    'metode_pembayaran' => $request->metode_pembayaran ?? 'cash',
+                ]
             );
-    });
-}
+
+            return redirect()
+                ->route('resepsionis.pembayaran.index')
+                ->with(
+                    'success',
+                    'Pembayaran berhasil. Kembalian: Rp '.
+                    number_format($kembalian, 0, ',', '.')
+                );
+        });
+    }
 
     /**
      * Remove the specified resource from storage.

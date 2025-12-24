@@ -1,6 +1,6 @@
 import { Cloud, CloudLightning, CloudRain, Sun } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { AvatarCircles } from '../ui/avatar-circles';
+import { AvatarCircles } from '../../components/ui/avatar-circles';
 
 import dummy1 from '@/assets/image/dummy-1.jpg';
 import dummy2 from '@/assets/image/dummy-2.jpg';
@@ -77,8 +77,6 @@ const HeroSection = () => {
 
                     const data = await res.json();
 
-                    console.log('WeatherAPI response:', data);
-
                     setCity(data.location?.name || '');
 
                     const condition =
@@ -153,7 +151,7 @@ const HeroSection = () => {
                 )}
 
                 {/* Center Content */}
-                <div className="relative z-10 flex h-full items-center justify-center px-6">
+                <div className="relative z-10 flex h-full items-center justify-center px-6 md:mb-20">
                     <div className="w-full max-w-5xl text-center text-white">
                         <span className="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-light tracking-wide text-white backdrop-blur-xs">
                             Ribuan Klinik Terverifikasi

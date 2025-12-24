@@ -45,7 +45,7 @@ export default function FormCreateCatatanLayananDokter({
                     <textarea
                         readOnly
                         rows={3}
-                        value={data.keluhan_utama}
+                        value={data.keluhan_utama || '-'}
                         className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm"
                     />
                 </div>

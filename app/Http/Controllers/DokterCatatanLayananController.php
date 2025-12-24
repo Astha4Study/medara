@@ -22,8 +22,10 @@ class DokterCatatanLayananController extends Controller
             abort(404, 'Data dokter tidak ditemukan');
         }
 
+        $punyaServer = $user->klinik?->punya_server ?? 0;
+
         $catatan = CatatanLayanan::with(['pasien', 'antrian'])
-            ->where('dokter_id', $dokter->id) // gunakan $dokter->id, bukan $user->id
+            ->where('dokter_id', $dokter->id)
             ->where('klinik_id', $user->klinik_id)
             ->latest('updated_at')
             ->get()
@@ -32,15 +34,16 @@ class DokterCatatanLayananController extends Controller
                 'nomor_pasien' => $c->pasien?->nomor_pasien ?? '',
                 'nama_lengkap' => $c->pasien?->nama_lengkap ?? '',
                 'tanggal_kunjungan' => $c->tanggal_kunjungan,
-                'keluhan_utama' => $c->keluhan_utama,
-                'diagnosa' => $c->diagnosa,
-                'tindakan' => $c->tindakan,
+                'keluhan_utama' => $punyaServer ? $c->keluhan_utama : null,
+                'diagnosa' => $punyaServer ? $c->diagnosa : null,
+                'tindakan' => $punyaServer ? $c->tindakan : null,
                 'catatan_lain' => $c->catatan_lain,
                 'tanggal_ditangani' => $c->updated_at->format('d M Y'),
             ]);
 
         return Inertia::render('Dokter/CatatanLayanan/Index', [
             'catatan' => $catatan,
+            'punya_server' => $punyaServer,
         ]);
     }
 
@@ -100,10 +103,18 @@ class DokterCatatanLayananController extends Controller
     {
         $dokter = Auth::user()->dokter;
 
-        $catatan = CatatanLayanan::with(['pasien', 'dokter', 'antrian'])
+        $catatan = CatatanLayanan::with([
+            'pasien',
+            'dokter.user',
+            'antrian',
+            'pasien.klinik:id,punya_server',
+            'detail.layanan:id,nama_layanan',
+        ])
             ->where('id', $id)
             ->where('dokter_id', $dokter->id)
             ->firstOrFail();
+
+        $punyaServer = $catatan->pasien?->klinik?->punya_server ?? 0;
 
         return Inertia::render('Dokter/CatatanLayanan/Show', [
             'catatan' => [
@@ -122,11 +133,16 @@ class DokterCatatanLayananController extends Controller
                 'tanggal_kunjungan' => $catatan->tanggal_kunjungan,
                 'keluhan_utama' => $catatan->keluhan_utama,
                 'detail_keluhan' => $catatan->detail_keluhan,
-                'diagnosa' => $catatan->diagnosa,
+                'diagnosa' => $punyaServer ? $catatan->diagnosa : null,
                 'tindakan' => $catatan->tindakan,
                 'catatan_lain' => $catatan->catatan_lain,
                 'dokter_nama' => $catatan->dokter?->user?->name ?? '',
-                'tanggal_ditangani' => $catatan->updated_at->format('d M Y'),
+                'punya_server' => $punyaServer,
+
+                'detail_layanan' => $catatan->detail->map(fn ($d) => [
+                    'id' => $d->id,
+                    'layanan' => $d->layanan?->nama_layanan ?? '-',
+                ]),
             ],
         ]);
     }

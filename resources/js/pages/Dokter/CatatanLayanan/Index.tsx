@@ -18,21 +18,13 @@ type Catatan = {
 
 type PageProps = {
     catatan: Catatan[];
+    punya_server: number;
 };
-
-const listTable = [
-    'Nomor Pasien',
-    'Nama Pasien',
-    'Keluhan Utama',
-    'Diagnosa',
-    'Tindakan',
-    'Tanggal Dikunjungi',
-];
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Catatan Layanan', href: '' }];
 
 export default function CatatanLayananIndexDokter() {
-    const { catatan } = usePage<PageProps>().props;
+    const { catatan, punya_server } = usePage<PageProps>().props;
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredCatatanLayanan = catatan.filter(
@@ -81,15 +73,33 @@ export default function CatatanLayananIndexDokter() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-gray-200 bg-gray-50">
-                                    {listTable.map((item) => (
-                                        <th
-                                            key={item}
-                                            className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                                        >
-                                            {item}
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Nomor Pasien
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Nama Pasien
+                                    </th>
+                                    {punya_server === 1 ? (
+                                        <>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                Keluhan Utama
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                Diagnosa
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                Tindakan
+                                            </th>
+                                        </>
+                                    ) : (
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Keterangan
                                         </th>
-                                    ))}
-                                    <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                    )}
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Tanggal Dikunjungi
+                                    </th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                                         Aksi
                                     </th>
                                 </tr>
@@ -107,15 +117,25 @@ export default function CatatanLayananIndexDokter() {
                                             <td className="px-6 py-4 text-gray-700">
                                                 {item.nama_lengkap}
                                             </td>
-                                            <td className="px-6 py-4 text-gray-700">
-                                                {item.keluhan_utama || '-'}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-700">
-                                                {item.diagnosa || '-'}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-700">
-                                                {item.tindakan || '-'}
-                                            </td>
+                                            {punya_server === 1 ? (
+                                                <>
+                                                    <td className="px-6 py-4 text-gray-700">
+                                                        {item.keluhan_utama ||
+                                                            '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-gray-700">
+                                                        {item.diagnosa || '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-gray-700">
+                                                        {item.tindakan || '-'}
+                                                    </td>
+                                                </>
+                                            ) : (
+                                                <td className="px-6 py-4 text-emerald-700 italic">
+                                                    Mode Tanpa Server – data
+                                                    medis dicatat manual
+                                                </td>
+                                            )}
                                             <td className="px-6 py-4 text-gray-700">
                                                 {item.tanggal_ditangani}
                                             </td>
@@ -132,7 +152,7 @@ export default function CatatanLayananIndexDokter() {
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={listTable.length + 1}
+                                            colSpan={punya_server === 1 ? 7 : 5}
                                             className="px-6 py-10 text-center text-sm text-gray-500"
                                         >
                                             Tidak ada data catatan layanan.

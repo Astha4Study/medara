@@ -3,28 +3,27 @@ import { Link } from '@inertiajs/react';
 import { ArrowUpRight, Menu, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
+import logo from '@/assets/svg/logo.svg';
+
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const menuItems = [
-        'Home',
-        'About Us',
-        'Services',
-        'Facilities',
-        'Membership',
-    ];
+    const menuItems = ['About Us', 'Services', 'Facilities', 'Membership'];
 
     return (
         <>
-            <nav className="relative z-50 w-full border-gray-200 bg-white">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <nav className="relative w-full border-gray-200 bg-white">
+                <div className="mx-auto px-4 sm:px-9">
                     <div className="flex h-16 items-center justify-between">
                         {/* Left */}
-                        <div className="flex items-center gap-8">
-                            {/* Logo */}
-                            <div className="text-lg font-bold text-gray-900">
-                                Sunrise
-                            </div>
+                        <div className="flex items-center gap-6">
+                            <Link href="/" className="flex items-center gap-2">
+                                <img
+                                    src={logo}
+                                    alt="logo"
+                                    className="h-8 w-auto sm:h-9 lg:h-10"
+                                />
+                            </Link>
 
                             {/* Desktop Menu */}
                             <ul className="hidden items-center gap-6 text-sm font-medium text-gray-700 lg:flex">
@@ -41,7 +40,7 @@ const Navbar = () => {
 
                         {/* Right */}
                         <div className="flex items-center gap-3">
-                            {/* Search */}
+                            {/* Search (Desktop) */}
                             <div className="relative hidden w-56 lg:block">
                                 <input
                                     type="text"
@@ -51,10 +50,10 @@ const Navbar = () => {
                                 <Search className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                             </div>
 
-                            {/* Login */}
+                            {/* Login (Desktop) */}
                             <Link
                                 href={login()}
-                                className="hidden items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-700 sm:flex"
+                                className="hidden items-center gap-1 rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-700 sm:flex"
                             >
                                 Masuk
                                 <ArrowUpRight size={16} />
@@ -85,7 +84,7 @@ const Navbar = () => {
                 />
             )}
 
-            {/* Mobile Menu Float */}
+            {/* Mobile Menu */}
             <div
                 className={`absolute top-16 right-0 left-0 z-50 origin-top transform transition duration-200 lg:hidden ${
                     isMenuOpen
@@ -93,7 +92,7 @@ const Navbar = () => {
                         : 'pointer-events-none scale-y-95 opacity-0'
                 }`}
             >
-                <div className="border border-gray-200 bg-white p-4 shadow-xl">
+                <div className="border-t border-gray-200 bg-white p-4 shadow-xl">
                     {/* Mobile Search */}
                     <div className="relative mb-4">
                         <input
@@ -104,7 +103,7 @@ const Navbar = () => {
                         <Search className="absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     </div>
 
-                    {/* Mobile Menu */}
+                    {/* Mobile Menu Items */}
                     <ul className="space-y-1">
                         {menuItems.map((item) => (
                             <li key={item}>

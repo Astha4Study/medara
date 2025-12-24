@@ -11,10 +11,12 @@ use App\Http\Controllers\ApotekerPenyerahanObatController;
 use App\Http\Controllers\ApotekerResepController;
 use App\Http\Controllers\ApotekerResepDetailController;
 use App\Http\Controllers\ApotekerResepMasukController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientKlinikController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DokterAntrianController;
 use App\Http\Controllers\DokterCatatanLayananController;
 use App\Http\Controllers\DokterFinalStoreCatatanLayananController;
-use App\Http\Controllers\DokterFinalStoreController;
 use App\Http\Controllers\DokterFinalStoreResepAndCatatanLayananController;
 use App\Http\Controllers\DokterKlinikController;
 use App\Http\Controllers\DokterPasienController;
@@ -29,12 +31,13 @@ use App\Http\Controllers\SuperAdminAddAdminController;
 use App\Http\Controllers\SuperAdminKlinikController;
 use App\Http\Controllers\SuperAdminPasienController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', fn() => Inertia::render('Landing/Index'))->name('home');
+Route::get('/', [ClientController::class, 'index'])->name('home');
+Route::get('/klinik/{slug}', [ClientKlinikController::class, 'show'])
+    ->name('klinik.detail');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', fn() => Inertia::render('dashboard'))->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'verified']);
 
     Route::middleware(['auth', 'role:super_admin'])
         ->prefix('super-admin')
@@ -153,5 +156,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
