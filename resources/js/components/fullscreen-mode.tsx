@@ -16,7 +16,7 @@ const FullScreenMode = () => {
     return (
         <button
             onClick={toggleFullscreen}
-            className="rounded-md border border-border p-1.5"
+            className="hidden rounded-md border border-border p-1.5 lg:block"
             aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
         >
             {isFullscreen ? (

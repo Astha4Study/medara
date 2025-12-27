@@ -1,9 +1,23 @@
 import PasienPembayaranChartsResepsionis from '@/components/charts/pasien-pembayaran-charts-resepsionis';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil } from 'lucide-react';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link } from '@inertiajs/react';
+import {
+    Calendar,
+    CreditCard,
+    Pencil,
+    User,
+    UserPlus,
+    Wallet,
+} from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
+
+type ChartItem = {
+    tanggal: string;
+    pasien: number;
+    pembayaran: number;
+};
 
 type PageProps = {
     klinik: {
@@ -15,7 +29,10 @@ type PageProps = {
     user: { id: number; name: string };
     reseps: { id: number; nama_pasien: string; total_harga: number }[];
     pasienBaru: { id: number; nama_lengkap: string; tanggal: string }[];
-    chart: { tanggal: string; pasien: number; pembayaran: number }[];
+    chart: {
+        mingguan: ChartItem[];
+        bulanan: ChartItem[];
+    };
 };
 
 const formatRupiah = (v: number) =>
@@ -25,35 +42,26 @@ const formatRupiah = (v: number) =>
         minimumFractionDigits: 0,
     }).format(v);
 
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '' }];
+
 export default function ResepsionisDashboard({
     klinik,
     user,
     reseps,
     pasienBaru,
+    chart,
 }: PageProps) {
-    const { chart, period: initialPeriod } = usePage().props as any;
-    const [period, setPeriod] = useState<'week' | 'month'>(initialPeriod);
-
-    const handleChangePeriod = (value: 'week' | 'month') => {
-        setPeriod(value);
-        router.get(
-            route('dashboard'),
-            { period: value },
-            { preserveState: true, preserveScroll: true, replace: true },
-        );
-    };
+    const [period, setPeriod] = useState<'week' | 'month'>('week');
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard Resepsionis" />
 
-            <div className="p-6">
-                {/* FLEX ROW : kiri & kanan sejajar tinggi */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    {/* KIRI : 2 card bertumpuk */}
-                    <div className="col-span-2 flex flex-col gap-6">
+            <div className="p-3 sm:p-4 md:p-6">
+                <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
+                    <div className="flex flex-col gap-4 lg:col-span-2">
                         {/* Hero Klinik */}
-                        <div className="relative h-40 overflow-hidden rounded-2xl shadow-lg md:h-72">
+                        <div className="relative h-48 overflow-hidden rounded-2xl shadow-lg md:h-56 lg:h-72">
                             {klinik.gambar ? (
                                 <img
                                     src={klinik.gambar}
@@ -61,8 +69,10 @@ export default function ResepsionisDashboard({
                                     className="absolute inset-0 h-full w-full object-cover"
                                 />
                             ) : (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gray-200 text-gray-600">
-                                    Gambar klinik tidak tersedia
+                                <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-emerald-100 to-emerald-200 text-gray-600">
+                                    <p className="text-sm">
+                                        Gambar klinik tidak tersedia
+                                    </p>
                                 </div>
                             )}
 
@@ -73,34 +83,36 @@ export default function ResepsionisDashboard({
                                 className="absolute top-3 right-3 inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-medium text-white ring-1 ring-white/20 backdrop-blur-sm transition hover:bg-white/25 hover:ring-white/30"
                             >
                                 <Pencil className="h-3.5 w-3.5 opacity-90" />
-                                Edit Klinik
+                                <span className="hidden sm:inline">
+                                    Edit Klinik
+                                </span>
                             </Link>
 
                             <div className="absolute bottom-4 left-4 z-10">
-                                <p className="text-[11px] tracking-wide text-white/60">
+                                <p className="text-xs tracking-wide text-white/70 md:text-sm">
                                     Selamat datang,
                                 </p>
-                                <p className="text-base font-semibold text-white md:text-lg">
+                                <p className="mt-0.5 text-lg font-bold text-white md:text-xl">
                                     {user.name}
                                 </p>
                             </div>
 
-                            <div className="absolute right-4 bottom-4 z-10 max-w-[65%] text-right">
-                                <span className="inline-flex items-center rounded-full bg-emerald-400/15 px-3 py-1 text-[11px] font-medium text-emerald-200 ring-1 ring-emerald-400/30 backdrop-blur">
+                            <div className="absolute right-4 bottom-4 z-10 max-w-[60%] text-right md:max-w-[65%]">
+                                <span className="inline-flex items-center rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-medium text-emerald-100 ring-1 ring-emerald-400/40 backdrop-blur-sm">
                                     {klinik.jenis_klinik}
                                 </span>
-                                <h1 className="mt-2 text-lg leading-snug font-semibold text-white md:text-xl">
+                                <h1 className="mt-2 text-base leading-snug font-bold text-white md:text-lg lg:text-xl">
                                     {klinik.nama_klinik}
                                 </h1>
-                                <p className="mt-0.5 text-[11px] text-white/60">
+                                <p className="mt-1 text-xs text-white/70 md:text-sm">
                                     Dashboard operasional klinik
                                 </p>
                             </div>
                         </div>
 
-                        {/* Chart */}
-                        <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-100">
-                            <div className="mb-4 flex items-start justify-between">
+                        {/* Chart Section */}
+                        <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-100 md:p-5">
+                            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <h3 className="text-sm font-semibold text-gray-900">
                                         Statistik Pasien & Pembayaran
@@ -112,10 +124,8 @@ export default function ResepsionisDashboard({
 
                                 <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 text-xs">
                                     <button
-                                        onClick={() =>
-                                            handleChangePeriod('week')
-                                        }
-                                        className={`rounded-md px-3 py-1.5 transition ${
+                                        onClick={() => setPeriod('week')}
+                                        className={`rounded-md px-3 py-1.5 ${
                                             period === 'week'
                                                 ? 'bg-emerald-600 text-white shadow-sm'
                                                 : 'text-gray-500 hover:text-gray-700'
@@ -124,10 +134,8 @@ export default function ResepsionisDashboard({
                                         Mingguan
                                     </button>
                                     <button
-                                        onClick={() =>
-                                            handleChangePeriod('month')
-                                        }
-                                        className={`rounded-md px-3 py-1.5 transition ${
+                                        onClick={() => setPeriod('month')}
+                                        className={`rounded-md px-3 py-1.5 ${
                                             period === 'month'
                                                 ? 'bg-emerald-600 text-white shadow-sm'
                                                 : 'text-gray-500 hover:text-gray-700'
@@ -138,45 +146,52 @@ export default function ResepsionisDashboard({
                                 </div>
                             </div>
 
-                            <div className="h-[260px]">
+                            <div className="h-60 md:h-[260px]">
                                 <PasienPembayaranChartsResepsionis
-                                    data={chart}
+                                    data={
+                                        period === 'week'
+                                            ? chart.mingguan
+                                            : chart.bulanan
+                                    }
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* KANAN : 2 card sejajar tinggi kiri */}
-                    <aside className="flex flex-col gap-6">
+                    {/* Right Section */}
+                    <aside className="flex flex-col gap-4 md:gap-6">
                         {/* Pembayaran Menunggu */}
-                        <div className="flex-1 rounded-xl bg-white shadow-sm ring-1 ring-gray-100">
+                        <div className="min-h-[300px] flex-1 rounded-xl bg-white shadow-sm ring-1 ring-gray-100 lg:min-h-0">
                             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                                <h3 className="text-sm font-semibold text-gray-900">
-                                    Pembayaran Menunggu
-                                </h3>
+                                <div className="flex items-center gap-2">
+                                    <CreditCard className="h-4 w-4 text-emerald-600" />
+                                    <h3 className="text-sm font-semibold text-gray-900">
+                                        Pembayaran Menunggu
+                                    </h3>
+                                </div>
                                 <Link
                                     href={route('resepsionis.pembayaran.index')}
-                                    className="text-xs font-medium text-emerald-600 hover:underline"
+                                    className="text-xs font-medium text-emerald-600 transition-colors hover:text-emerald-700 hover:underline"
                                 >
                                     Lihat semua
                                 </Link>
                             </div>
 
-                            <div className="h-[calc(100%-48px)] overflow-y-auto p-3">
+                            <div className="h-[calc(100%-48px)] overflow-y-auto">
                                 {reseps.length > 0 ? (
                                     <table className="w-full text-xs">
-                                        <thead className="sticky top-0 bg-gray-50 text-gray-500">
+                                        <thead className="sticky top-0 z-10 bg-gray-50 text-gray-500">
                                             <tr>
-                                                <th className="px-3 py-2 text-center">
+                                                <th className="px-2 py-2 text-center font-medium md:px-3">
                                                     No
                                                 </th>
-                                                <th className="px-3 py-2 text-left">
+                                                <th className="px-2 py-2 text-left font-medium md:px-3">
                                                     Pasien
                                                 </th>
-                                                <th className="px-3 py-2 text-right">
+                                                <th className="px-2 py-2 text-right font-medium md:px-3">
                                                     Total
                                                 </th>
-                                                <th className="px-3 py-2 text-center">
+                                                <th className="px-2 py-2 text-center font-medium md:px-3">
                                                     Aksi
                                                 </th>
                                             </tr>
@@ -185,28 +200,38 @@ export default function ResepsionisDashboard({
                                             {reseps.map((item, i) => (
                                                 <tr
                                                     key={item.id}
-                                                    className="hover:bg-gray-50"
+                                                    className="transition-colors hover:bg-gray-50"
                                                 >
-                                                    <td className="px-3 py-2 text-center font-medium">
+                                                    <td className="px-2 py-2 text-center font-bold text-emerald-700 md:px-3">
                                                         {i + 1}
                                                     </td>
-                                                    <td className="px-3 py-2 text-left">
-                                                        {item.nama_pasien}
+                                                    <td className="px-2 py-2 md:px-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <User className="h-4 w-4 shrink-0 text-emerald-600" />
+                                                            <span className="truncate font-medium text-gray-900">
+                                                                {
+                                                                    item.nama_pasien
+                                                                }
+                                                            </span>
+                                                        </div>
                                                     </td>
-                                                    <td className="px-3 py-2 text-right">
+                                                    <td className="px-2 py-2 text-right text-[10px] font-medium text-gray-800 md:px-3 md:text-xs">
                                                         {formatRupiah(
                                                             item.total_harga,
                                                         )}
                                                     </td>
-                                                    <td className="px-3 py-2 text-center">
+                                                    <td className="px-2 py-2 text-center md:px-3">
                                                         <Link
                                                             href={route(
                                                                 'resepsionis.pembayaran.proses-bayar',
                                                                 item.id,
                                                             )}
-                                                            className="rounded-md bg-emerald-600 px-2 py-1 text-[11px] text-white hover:bg-emerald-700"
+                                                            className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-emerald-700"
                                                         >
-                                                            Bayar
+                                                            <Wallet className="h-3.5 w-3.5" />
+                                                            <span className="hidden sm:inline">
+                                                                Bayar
+                                                            </span>
                                                         </Link>
                                                     </td>
                                                 </tr>
@@ -214,57 +239,50 @@ export default function ResepsionisDashboard({
                                         </tbody>
                                     </table>
                                 ) : (
-                                    <div className="flex h-full flex-col items-center justify-center gap-2 px-4 py-6 text-center text-xs text-gray-500">
-                                        {/* Icon ilustrasi kosong */}
-                                        <svg
-                                            className="h-10 w-10 text-emerald-600"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            strokeWidth={1.5}
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M21 12a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
-                                            />
-                                        </svg>
-
-                                        <p className="font-medium">
-                                            Belum ada pembayaran menunggu
-                                        </p>
+                                    <div className="flex h-full flex-col items-center justify-center gap-3 px-4 py-8 text-center">
+                                        <Wallet className="h-12 w-12 text-emerald-600/60" />
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-700">
+                                                Belum ada pembayaran menunggu
+                                            </p>
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                Pembayaran akan muncul di sini
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Pasien Baru Bulan Ini */}
-                        <div className="flex-1 rounded-xl bg-white shadow-sm ring-1 ring-gray-100">
+                        <div className="min-h-[300px] flex-1 rounded-xl bg-white shadow-sm ring-1 ring-gray-100 lg:min-h-0">
                             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                                <h3 className="text-sm font-semibold text-gray-900">
-                                    Pasien Baru Bulan Ini
-                                </h3>
+                                <div className="flex items-center gap-2">
+                                    <UserPlus className="h-4 w-4 text-emerald-600" />
+                                    <h3 className="text-sm font-semibold text-gray-900">
+                                        Pasien Baru Bulan Ini
+                                    </h3>
+                                </div>
                                 <Link
                                     href={route('resepsionis.pasien.index')}
-                                    className="text-xs font-medium text-emerald-600 hover:underline"
+                                    className="text-xs font-medium text-emerald-600 transition-colors hover:text-emerald-700 hover:underline"
                                 >
                                     Lihat semua
                                 </Link>
                             </div>
 
-                            <div className="h-[calc(100%-48px)] overflow-y-auto p-3">
+                            <div className="h-[calc(100%-48px)] overflow-y-auto">
                                 {pasienBaru.length > 0 ? (
                                     <table className="w-full text-xs">
-                                        <thead className="sticky top-0 bg-gray-50 text-gray-500">
+                                        <thead className="sticky top-0 z-10 bg-gray-50 text-gray-500">
                                             <tr>
-                                                <th className="px-3 py-2 text-center">
+                                                <th className="px-2 py-2 text-center font-medium md:px-3">
                                                     No
                                                 </th>
-                                                <th className="px-3 py-2 text-left">
+                                                <th className="px-2 py-2 text-left font-medium md:px-3">
                                                     Pasien
                                                 </th>
-                                                <th className="px-3 py-2 text-right">
+                                                <th className="px-2 py-2 text-right font-medium md:px-3">
                                                     Tanggal
                                                 </th>
                                             </tr>
@@ -273,33 +291,51 @@ export default function ResepsionisDashboard({
                                             {pasienBaru.map((p, i) => (
                                                 <tr
                                                     key={p.id}
-                                                    className="hover:bg-gray-50"
+                                                    className="transition-colors hover:bg-gray-50"
                                                 >
-                                                    <td className="px-3 py-2 text-center">
+                                                    <td className="px-2 py-2 text-center font-bold text-emerald-700 md:px-3">
                                                         {i + 1}
                                                     </td>
-                                                    <td className="px-3 py-2 text-left">
-                                                        {p.nama_lengkap}
+                                                    <td className="px-2 py-2 md:px-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <User className="h-4 w-4 shrink-0 text-emerald-600" />
+                                                            <span className="truncate font-medium text-gray-900">
+                                                                {p.nama_lengkap}
+                                                            </span>
+                                                        </div>
                                                     </td>
-                                                    <td className="px-3 py-2 text-right text-gray-600">
-                                                        {new Date(
-                                                            p.tanggal,
-                                                        ).toLocaleDateString(
-                                                            'id-ID',
-                                                            {
-                                                                day: '2-digit',
-                                                                month: 'short',
-                                                                year: 'numeric',
-                                                            },
-                                                        )}
+                                                    <td className="px-2 py-2 text-right md:px-3">
+                                                        <div className="inline-flex items-center gap-1 text-[10px] text-gray-600 md:text-xs">
+                                                            <Calendar className="h-3.5 w-3.5 shrink-0" />
+                                                            <span className="whitespace-nowrap">
+                                                                {new Date(
+                                                                    p.tanggal,
+                                                                ).toLocaleDateString(
+                                                                    'id-ID',
+                                                                    {
+                                                                        day: '2-digit',
+                                                                        month: 'short',
+                                                                        year: 'numeric',
+                                                                    },
+                                                                )}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
                                 ) : (
-                                    <div className="flex h-full items-center justify-center text-xs text-gray-500">
-                                        Belum ada pasien baru bulan ini
+                                    <div className="flex h-full flex-col items-center justify-center gap-3 px-4 py-8 text-center">
+                                        <UserPlus className="h-12 w-12 text-emerald-600/60" />
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-700">
+                                                Belum ada pasien baru bulan ini
+                                            </p>
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                Data pasien akan muncul di sini
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>

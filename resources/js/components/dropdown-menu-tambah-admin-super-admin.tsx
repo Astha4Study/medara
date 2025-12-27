@@ -21,13 +21,15 @@ import { useState } from 'react';
 interface Props {
     id: number;
     name: string;
+    onDelete: () => void;
 }
 
-export default function DropdownAdminSuperAdmin({ id, name }: Props) {
+export default function DropdownAdminSuperAdmin({ id, name, onDelete }: Props) {
     const [openAlert, setOpenAlert] = useState(false);
 
     const handleDelete = () => {
         router.delete(`/super-admin/kelola-admin/${id}`);
+        onDelete();
     };
 
     return (

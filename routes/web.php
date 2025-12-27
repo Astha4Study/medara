@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminAddResepsionisAndApotekerAndDoktorController;
+use App\Http\Controllers\AdminBugReportsController;
 use App\Http\Controllers\AdminKlinikController;
 use App\Http\Controllers\AdminLayananController;
 use App\Http\Controllers\AdminPengaturanController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\ResepsionisPasienController;
 use App\Http\Controllers\ResepsionisPembayaranController;
 use App\Http\Controllers\ResepsionisStoreAntrianAndPemeriksaanFisikController;
 use App\Http\Controllers\SuperAdminAddAdminController;
+use App\Http\Controllers\SuperAdminBugReportsController;
 use App\Http\Controllers\SuperAdminKlinikController;
 use App\Http\Controllers\SuperAdminPasienController;
 use Illuminate\Support\Facades\Route;
@@ -48,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('kelola-admin', SuperAdminAddAdminController::class)
                 ->parameters(['kelola-admin' => 'admin'])
                 ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+            Route::resource('bug-reports', SuperAdminBugReportsController::class)
+                ->only(['index', 'edit', 'show', 'update']);
+
         });
 
     Route::middleware(['auth', 'role:admin'])
@@ -71,6 +76,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('pengaturan.index');
             Route::put('/pengaturan/update', [AdminPengaturanKlinikController::class, 'update'])
                 ->name('pengaturan.update');
+            Route::resource('bug-reports', AdminBugReportsController::class)
+                ->only(['index', 'create', 'store', 'show', 'update']);
         });
 
     Route::middleware(['auth', 'role:resepsionis'])

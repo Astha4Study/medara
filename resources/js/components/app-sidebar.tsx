@@ -16,6 +16,7 @@ import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
     BookPlus,
+    Bug,
     ClipboardList,
     CreditCard,
     HandCoins,
@@ -88,6 +89,11 @@ export function AppSidebar() {
             href: `${prefix}/tambah-user`,
             icon: UserRoundPlus,
         },
+        {
+            title: 'Bug Reports',
+            href: `${prefix}/bug-reports`,
+            icon: Bug,
+        },
         { title: 'Pengaturan', href: `${prefix}/pengaturan`, icon: Settings },
     ];
 
@@ -97,11 +103,11 @@ export function AppSidebar() {
     > = {
         super_admin: {
             main: ['Dashboard', 'Klinik'],
-            footer: ['Kelola Admin'],
+            footer: ['Kelola Admin', 'Bug Reports'],
         },
         admin: {
             main: ['Dashboard', 'Klinik', 'Tambah Layanan'],
-            footer: ['Tambah User', 'Pengaturan'],
+            footer: ['Tambah User', 'Bug Reports', 'Pengaturan'],
         },
         resepsionis: {
             main: ['Dashboard', 'Pasien', 'Antrian', 'Klinik', 'Pembayaran'],

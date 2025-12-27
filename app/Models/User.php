@@ -25,6 +25,7 @@ class User extends Authenticatable
         'klinik_id',
         'avatar',
         'created_by',
+        'last_login_at',
     ];
 
     /**
@@ -47,6 +48,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -59,5 +61,4 @@ class User extends Authenticatable
     {
         return $this->hasOne(Dokter::class, 'user_id', 'id');
     }
-
 }

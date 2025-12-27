@@ -49,7 +49,7 @@ export default function ClockIndicator() {
     }, []);
 
     return (
-        <div className="rounded-md border border-border px-2 py-1 text-base font-normal text-foreground tabular-nums">
+        <div className="rounded-md border border-border px-2 py-1 text-sm md:text-base font-normal text-foreground tabular-nums">
             {time}
         </div>
     );
