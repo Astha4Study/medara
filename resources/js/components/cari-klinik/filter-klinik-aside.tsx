@@ -1,0 +1,147 @@
+import { ChevronDown, Search } from 'lucide-react';
+import { useState } from 'react';
+
+const FilterKlinikAside = () => {
+    const [openSection, setOpenSection] = useState<string[]>([
+        'nama-klinik',
+        'jenis-klinik',
+        'fasilitas',
+    ]);
+
+    const toggleSection = (section: string) => {
+        setOpenSection((prev) =>
+            prev.includes(section)
+                ? prev.filter((s) => s !== section)
+                : [...prev, section],
+        );
+    };
+
+    return (
+        <aside className="sticky top-20 w-full max-w-xs rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <h3 className="mb-4 text-sm font-semibold text-gray-900">
+                Filter Klinik
+            </h3>
+
+            {/* Nama Klinik */}
+            <div className="mb-5">
+                <button
+                    onClick={() => toggleSection('nama-klinik')}
+                    className="mb-2 flex w-full items-center justify-between text-sm font-medium text-gray-800"
+                >
+                    Nama Klinik
+                    <ChevronDown
+                        className={`h-4 w-4 text-gray-400 transition-transform ${
+                            openSection.includes('nama-klinik')
+                                ? 'rotate-180'
+                                : ''
+                        }`}
+                    />
+                </button>
+
+                {openSection.includes('nama-klinik') && (
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Cari nama klinik"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-9 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none"
+                        />
+                        <Search className="absolute top-2.5 right-3 h-4 w-4 text-gray-400" />
+                    </div>
+                )}
+            </div>
+
+            {/* Jenis Klinik */}
+            <div className="mb-5">
+                <button
+                    onClick={() => toggleSection('jenis-klinik')}
+                    className="mb-2 flex w-full items-center justify-between text-sm font-medium text-gray-800"
+                >
+                    Jenis Klinik
+                    <ChevronDown
+                        className={`h-4 w-4 text-gray-400 transition-transform ${
+                            openSection.includes('jenis-klinik')
+                                ? 'rotate-180'
+                                : ''
+                        }`}
+                    />
+                </button>
+
+                {openSection.includes('jenis-klinik') && (
+                    <div className="space-y-2 text-sm text-gray-700">
+                        {[
+                            ['Umum', 120],
+                            ['Gigi', 56],
+                            ['Kebidanan & Kandungan', 32],
+                            ['Anak', 44],
+                            ['THT', 21],
+                            ['Mata', 18],
+                        ].map(([label, count]) => (
+                            <label
+                                key={label}
+                                className="flex items-center justify-between"
+                            >
+                                <span className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        className="accent-emerald-600"
+                                    />
+                                    {label}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                    {count}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Fasilitas */}
+            <div>
+                <button
+                    onClick={() => toggleSection('fasilitas')}
+                    className="mb-2 flex w-full items-center justify-between text-sm font-medium text-gray-800"
+                >
+                    Fasilitas
+                    <ChevronDown
+                        className={`h-4 w-4 text-gray-400 transition-transform ${
+                            openSection.includes('fasilitas')
+                                ? 'rotate-180'
+                                : ''
+                        }`}
+                    />
+                </button>
+
+                {openSection.includes('fasilitas') && (
+                    <div className="space-y-2 text-sm text-gray-700">
+                        {[
+                            ['BPJS', 98],
+                            ['Parkir', 142],
+                            ['Ruang Tunggu AC', 110],
+                            ['Apotek', 65],
+                            ['Laboratorium', 40],
+                        ].map(([label, count]) => (
+                            <label
+                                key={label}
+                                className="flex items-center justify-between"
+                            >
+                                <span className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        className="accent-emerald-600"
+                                    />
+                                    {label}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                    {count}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </aside>
+    );
+};
+
+export default FilterKlinikAside;
