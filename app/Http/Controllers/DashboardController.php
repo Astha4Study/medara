@@ -58,6 +58,34 @@ class DashboardController extends Controller
 
     private function renderAdminDashboard($user, $klinik)
     {
+        if (! $klinik || ! $klinik->id) {
+            return Inertia::render('Dashboard/Admin', [
+                'klinik' => null,
+                'user' => $user->only('id', 'name'),
+                'kpi' => [
+                    'dokter' => 0,
+                    'resepsionis' => 0,
+                    'apoteker' => 0,
+                    'pasien' => 0,
+                    'pendapatan_hari_ini' => 0,
+                    'antrian_aktif' => 0,
+                    'resep_belum_selesai' => 0,
+                ],
+                'trendPendapatan' => collect([
+                    ['tanggal' => 'Sen', 'total' => 0],
+                    ['tanggal' => 'Sel', 'total' => 0],
+                    ['tanggal' => 'Rab', 'total' => 0],
+                    ['tanggal' => 'Kam', 'total' => 0],
+                    ['tanggal' => 'Jum', 'total' => 0],
+                    ['tanggal' => 'Sab', 'total' => 0],
+                    ['tanggal' => 'Min', 'total' => 0],
+                ]),
+                'statusLayanan' => [],
+                'obatStokMenipisByKlinik' => [],
+                'pendapatanTahunan' => [],
+            ]);
+        }
+
         $kpiAdmin = $this->getKpiAdmin($klinik);
         $trendPendapatan = $this->getTrendPendapatan($klinik);
         $statusLayanan = $this->getStatusLayanan($klinik->id);
@@ -383,6 +411,18 @@ class DashboardController extends Controller
 
     private function getKpiAdmin($klinik)
     {
+        if (! $klinik || ! $klinik->id) {
+            return [
+                'dokter' => 0,
+                'resepsionis' => 0,
+                'apoteker' => 0,
+                'pasien' => 0,
+                'pendapatan_hari_ini' => 0,
+                'antrian_aktif' => 0,
+                'resep_belum_selesai' => 0,
+            ];
+        }
+
         $pendapatanHariIni = Pembayaran::where('klinik_id', $klinik->id)
             ->whereIn('status', ['lunas', 'selesai'])
             ->whereDate('updated_at', now()->toDateString())
@@ -415,6 +455,18 @@ class DashboardController extends Controller
 
     private function getTrendPendapatan($klinik)
     {
+        if (! $klinik || ! $klinik->id) {
+            return collect([
+                ['tanggal' => 'Sen', 'total' => 0],
+                ['tanggal' => 'Sel', 'total' => 0],
+                ['tanggal' => 'Rab', 'total' => 0],
+                ['tanggal' => 'Kam', 'total' => 0],
+                ['tanggal' => 'Jum', 'total' => 0],
+                ['tanggal' => 'Sab', 'total' => 0],
+                ['tanggal' => 'Min', 'total' => 0],
+            ]);
+        }
+
         $startOfWeek = Carbon::now()->startOfWeek(CarbonInterface::MONDAY);
         $endOfWeek = Carbon::now()->endOfWeek(CarbonInterface::SUNDAY);
 

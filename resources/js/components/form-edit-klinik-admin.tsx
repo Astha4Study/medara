@@ -6,6 +6,7 @@ import {
     Mail,
     MapPin,
     Phone,
+    X,
 } from 'lucide-react';
 import React from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
@@ -19,6 +20,7 @@ interface FormEditKlinikAdminProps {
     processing: boolean;
     isDirty: boolean;
     errors?: Record<string, string>;
+    fasilitas?: { id: number; nama: string }[];
 }
 
 const FormEditKlinikAdmin: React.FC<FormEditKlinikAdminProps> = ({
@@ -29,7 +31,13 @@ const FormEditKlinikAdmin: React.FC<FormEditKlinikAdminProps> = ({
     processing,
     isDirty,
     errors = {},
+    fasilitas = [],
 }) => {
+    const [query, setQuery] = React.useState('');
+    const [suggestions, setSuggestions] = React.useState<
+        { id: number; nama: string }[]
+    >([]);
+
     return (
         <form
             onSubmit={handleSubmit}
@@ -232,6 +240,83 @@ const FormEditKlinikAdmin: React.FC<FormEditKlinikAdminProps> = ({
                     placeholder="Tuliskan deskripsi singkat tentang klinik..."
                     className="w-full resize-none rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 />
+            </div>
+
+            {/* Fasilitas */}
+            <div className="relative">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Fasilitas
+                </label>
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        setQuery(value);
+                        setSuggestions(
+                            fasilitas.filter((f) =>
+                                f.nama
+                                    .toLowerCase()
+                                    .includes(value.toLowerCase()),
+                            ),
+                        );
+                    }}
+                    placeholder="Cari fasilitas..."
+                    className="w-full rounded-lg border px-3 py-2 text-sm"
+                />
+
+                {/* daftar saran melayang */}
+                {suggestions.length > 0 && (
+                    <ul className="absolute z-10 mt-1 w-full rounded-lg border bg-white shadow">
+                        {suggestions.map((f) => (
+                            <li
+                                key={f.id}
+                                onClick={() => {
+                                    if (!data.fasilitas.includes(f.id)) {
+                                        setData('fasilitas', [
+                                            ...data.fasilitas,
+                                            f.id,
+                                        ]); // ➕ tambah fasilitas baru
+                                    }
+                                    setQuery('');
+                                    setSuggestions([]);
+                                }}
+                                className="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                            >
+                                {f.nama}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                {/* badge fasilitas terpilih */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                    {data.fasilitas.map((id: number) => {
+                        const f = fasilitas.find((x) => x.id === id);
+                        return (
+                            <span
+                                key={id}
+                                className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700"
+                            >
+                                {f?.nama}
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setData(
+                                            'fasilitas',
+                                            data.fasilitas.filter(
+                                                (fid: number) => fid !== id,
+                                            ), // ➖ hapus fasilitas
+                                        )
+                                    }
+                                    className="ml-2 text-emerald-600 hover:text-emerald-800"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </span>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Gambar */}

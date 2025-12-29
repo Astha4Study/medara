@@ -18,6 +18,7 @@ interface FormCreateKlinikProps {
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     handleChangeFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
     processing: boolean;
+    fasilitas?: { id: number; nama: string }[];
 }
 
 const FormCreateKlinik: React.FC<FormCreateKlinikProps> = ({
@@ -26,8 +27,13 @@ const FormCreateKlinik: React.FC<FormCreateKlinikProps> = ({
     handleSubmit,
     handleChangeFile,
     processing,
+    fasilitas = [],
 }) => {
     const [errors, setErrors] = useState<{ no_telepon?: string }>({});
+    const [query, setQuery] = useState('');
+    const [suggestions, setSuggestions] = useState<
+        { id: number; nama: string }[]
+    >([]);
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -247,6 +253,81 @@ const FormCreateKlinik: React.FC<FormCreateKlinikProps> = ({
                     placeholder="Tuliskan deskripsi singkat tentang Klinik..."
                     className="w-full resize-none rounded-lg border border-gray-200 px-4 py-2.5 text-sm transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 />
+            </div>
+
+            {/* Fasilitas */}
+            <div className="relative">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Fasilitas
+                </label>
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        setQuery(value);
+                        setSuggestions(
+                            fasilitas.filter((f) =>
+                                f.nama
+                                    .toLowerCase()
+                                    .includes(value.toLowerCase()),
+                            ),
+                        );
+                    }}
+                    placeholder="Cari fasilitas..."
+                    className="w-full rounded-lg border px-3 py-2 text-sm"
+                />
+
+                {suggestions.length > 0 && (
+                    <ul className="absolute z-10 mt-1 w-full rounded-lg border bg-white shadow">
+                        {suggestions.map((f) => (
+                            <li
+                                key={f.id}
+                                onClick={() => {
+                                    if (!data.fasilitas.includes(f.id)) {
+                                        setData('fasilitas', [
+                                            ...data.fasilitas,
+                                            f.id,
+                                        ]);
+                                    }
+                                    setQuery('');
+                                    setSuggestions([]);
+                                }}
+                                className="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                            >
+                                {f.nama}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                    {data.fasilitas.map((id: number) => {
+                        const f = fasilitas.find((x) => x.id === id);
+                        return (
+                            <span
+                                key={id}
+                                className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700"
+                            >
+                                {f?.nama}
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setData(
+                                            'fasilitas',
+                                            data.fasilitas.filter(
+                                                (fid: number) => fid !== id,
+                                            ),
+                                        )
+                                    }
+                                    className="ml-2 text-emerald-600 hover:text-emerald-800"
+                                >
+                                    ✕
+                                </button>
+                            </span>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Gambar */}

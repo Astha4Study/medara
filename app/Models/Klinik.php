@@ -37,7 +37,6 @@ class Klinik extends Model
         'punya_apoteker' => 'boolean',
     ];
 
-
     public function owner()
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -48,10 +47,9 @@ class Klinik extends Model
         return $this->hasMany(Pasien::class);
     }
 
-
     public function getGambarUrlAttribute()
     {
-        return $this->gambar ? asset('storage/' . $this->gambar) : null;
+        return $this->gambar ? asset('storage/'.$this->gambar) : null;
     }
 
     public function hapusGambarLama()
@@ -61,12 +59,17 @@ class Klinik extends Model
         }
     }
 
+    public function fasilitas()
+    {
+        return $this->belongsToMany(Fasilitas::class, 'fasilitas_klinik');
+    }
+
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($klinik) {
-            if (!$klinik->kode_klinik && $klinik->nama_klinik) {
+            if (! $klinik->kode_klinik && $klinik->nama_klinik) {
                 $words = explode(' ', $klinik->nama_klinik);
                 $initials = '';
                 foreach ($words as $word) {
@@ -79,6 +82,4 @@ class Klinik extends Model
         });
 
     }
-
-
 }

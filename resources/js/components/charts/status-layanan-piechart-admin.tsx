@@ -1,3 +1,4 @@
+import { Activity } from 'lucide-react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 type Props = {
@@ -6,6 +7,9 @@ type Props = {
         value: number;
         color: string; // warna dikirim dari backend, wajib
     }[];
+    emptyIcon?: React.ComponentType<{ className?: string }>; // opsional
+    emptyTitle?: string;
+    emptyDesc?: string;
 };
 
 const CustomTooltip = ({
@@ -29,11 +33,24 @@ const CustomTooltip = ({
     );
 };
 
-const StatusLayananPieChartAdmin = ({ data }: Props) => {
+const StatusLayananPieChartAdmin = ({
+    data,
+    emptyIcon: EmptyIcon = Activity, // default ikon
+    emptyTitle = 'Belum ada data layanan',
+    emptyDesc = 'Tidak ada layanan yang ditampilkan saat ini',
+}: Props) => {
     if (!data || data.length === 0) {
         return (
-            <div className="flex h-48 items-center justify-center text-xs text-gray-500">
-                Tidak ada data layanan
+            <div className="flex h-full min-h-[200px] flex-col items-center justify-center gap-3 px-4 py-8 text-center">
+                <EmptyIcon className="h-10 w-10 text-emerald-600/60 sm:h-12 sm:w-12" />
+                <div>
+                    <p className="text-xs font-medium text-gray-700 sm:text-sm">
+                        {emptyTitle}
+                    </p>
+                    <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">
+                        {emptyDesc}
+                    </p>
+                </div>
             </div>
         );
     }

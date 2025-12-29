@@ -123,7 +123,7 @@ export default function LayananIndexAdmin() {
                         <table className="w-full text-sm">
                             <thead className="bg-gray-50">
                                 <tr className="border-b border-gray-200">
-                                    <th className="px-6 py-3">
+                                    <th className="px-6 py-3 text-center">
                                         <input
                                             type="checkbox"
                                             checked={
@@ -132,7 +132,7 @@ export default function LayananIndexAdmin() {
                                                 layanan.length > 0
                                             }
                                             onChange={toggleSelectAll}
-                                            className="h-4 w-4 rounded border-gray-300 text-emerald-600"
+                                            className="mx-auto h-4 w-4 rounded border-gray-300 text-emerald-600"
                                         />
                                     </th>
                                     {tableName.map((v, i) => (
@@ -153,7 +153,7 @@ export default function LayananIndexAdmin() {
                                             key={l.id}
                                             className="hover:bg-gray-50"
                                         >
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-3 text-center">
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedIds.includes(
@@ -162,7 +162,7 @@ export default function LayananIndexAdmin() {
                                                     onChange={() =>
                                                         toggleSelect(l.id)
                                                     }
-                                                    className="h-4 w-4 rounded border-gray-300 text-emerald-600"
+                                                    className="mx-auto h-4 w-4 rounded border-gray-300 text-emerald-600"
                                                 />
                                             </td>
 

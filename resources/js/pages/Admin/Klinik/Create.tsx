@@ -6,7 +6,11 @@ import { Head, useForm } from '@inertiajs/react';
 import { ChangeEvent, FormEventHandler } from 'react';
 import { toast } from 'sonner';
 
-export default function KlinikCreateAdmin() {
+type Props = {
+    fasilitas: { id: number; nama: string }[];
+};
+
+export default function KlinikCreateAdmin({ fasilitas }: Props) {
     const { data, setData, post, processing, reset } = useForm({
         nama_klinik: '',
         jenis_klinik: '',
@@ -24,6 +28,7 @@ export default function KlinikCreateAdmin() {
         punya_apoteker: 0,
         punya_server: 0,
         gambar: null as File | null,
+        fasilitas: [] as number[],
     });
 
     const handleChangeFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -77,6 +82,7 @@ export default function KlinikCreateAdmin() {
                             handleSubmit={handleSubmit}
                             handleChangeFile={handleChangeFile}
                             processing={processing}
+                            fasilitas={fasilitas}
                         />
                     </div>
 

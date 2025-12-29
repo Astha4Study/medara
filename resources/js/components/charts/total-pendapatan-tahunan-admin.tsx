@@ -1,3 +1,4 @@
+import { PiggyBank } from 'lucide-react'; // <- ikon kosong (bisa diganti)
 import {
     Bar,
     BarChart,
@@ -10,31 +11,30 @@ import {
 } from 'recharts';
 
 type Props = {
-    pendapatanTahunan: {
-        bulan: string;
-        total: number;
-    }[];
+    pendapatanTahunan: { bulan: string; total: number }[];
+    emptyIcon?: React.ComponentType<{ className?: string }>;
+    emptyTitle?: string;
+    emptyDesc?: string;
 };
 
 const COLORS = [
-    '#059669', // emerald-600
-    '#14B8A6', // teal-500
-    '#F59E0B', // amber-500
-    '#0EA5E9', // sky-500
-    '#F43F5E', // rose-500
-    '#8B5CF6', // violet-500
-    '#22C55E', // green-500
-    '#EAB308', // yellow-500
-    '#3B82F6', // blue-500
-    '#EC4899', // pink-500
-    '#6366F1', // indigo-500
-    '#D946EF', // fuchsia-500
+    '#059669',
+    '#14B8A6',
+    '#F59E0B',
+    '#0EA5E9',
+    '#F43F5E',
+    '#8B5CF6',
+    '#22C55E',
+    '#EAB308',
+    '#3B82F6',
+    '#EC4899',
+    '#6366F1',
+    '#D946EF',
 ];
 
 const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.length) return null;
     const { bulan, total } = payload[0].payload;
-
     return (
         <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs shadow-sm">
             <p className="mb-1 font-medium text-gray-700">{bulan}</p>
@@ -45,16 +45,28 @@ const CustomTooltip = ({ active, payload }: any) => {
     );
 };
 
-const TotalPendapatanTahunanAdmin = ({ pendapatanTahunan }: Props) => {
+const TotalPendapatanTahunanAdmin = ({
+    pendapatanTahunan,
+    emptyIcon: EmptyIcon = PiggyBank,
+    emptyTitle = 'Belum ada data pendapatan',
+    emptyDesc = 'Tidak ada transaksi yang tercatat saat ini',
+}: Props) => {
     if (!pendapatanTahunan || pendapatanTahunan.length === 0) {
         return (
-            <div className="flex h-48 items-center justify-center text-xs text-gray-500">
-                Tidak ada data pendapatan
+            <div className="flex h-full min-h-[200px] flex-col items-center justify-center gap-3 px-4 py-8 text-center">
+                <EmptyIcon className="h-10 w-10 text-emerald-600/60 sm:h-12 sm:w-12" />
+                <div>
+                    <p className="text-xs font-medium text-gray-700 sm:text-sm">
+                        {emptyTitle}
+                    </p>
+                    <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">
+                        {emptyDesc}
+                    </p>
+                </div>
             </div>
         );
     }
 
-    // Ambil 6 bulan terakhir
     const lastSixMonths = pendapatanTahunan.slice(-6);
 
     return (
@@ -76,16 +88,14 @@ const TotalPendapatanTahunanAdmin = ({ pendapatanTahunan }: Props) => {
                         tick={{ fontSize: 11, fill: '#64748b' }}
                         axisLine={false}
                         tickLine={false}
-                        tickFormatter={(value) =>
-                            `Rp ${value.toLocaleString('id-ID')}`
-                        }
+                        tickFormatter={(v) => `Rp ${v.toLocaleString('id-ID')}`}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="total">
-                        {lastSixMonths.map((entry, index) => (
+                        {lastSixMonths.map((entry, idx) => (
                             <Cell
-                                key={`cell-${index}`}
-                                fill={COLORS[index % COLORS.length]}
+                                key={`cell-${idx}`}
+                                fill={COLORS[idx % COLORS.length]}
                             />
                         ))}
                     </Bar>

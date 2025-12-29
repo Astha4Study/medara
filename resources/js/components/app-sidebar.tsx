@@ -76,6 +76,11 @@ export function AppSidebar() {
             href: `${prefix}/penyerahan-obat`,
             icon: HandCoins,
         },
+        {
+            title: 'Fasilitas Klinik',
+            href: `${prefix}/fasilitas-klinik`,
+            icon: Settings,
+        },
     ];
 
     const allFooterNavItems: NavItem[] = [
@@ -102,7 +107,7 @@ export function AppSidebar() {
         { main: string[]; footer: string[] }
     > = {
         super_admin: {
-            main: ['Dashboard', 'Klinik'],
+            main: ['Dashboard', 'Klinik', 'Fasilitas Klinik'],
             footer: ['Kelola Admin', 'Bug Reports'],
         },
         admin: {
@@ -164,7 +169,9 @@ export function AppSidebar() {
         {
             title: 'Manajemen Klinik',
             items: mainNavItems.filter((i) =>
-                ['Klinik', 'Tambah Layanan'].includes(i.title),
+                ['Klinik', 'Tambah Layanan', 'Fasilitas Klinik'].includes(
+                    i.title,
+                ),
             ),
         },
         {

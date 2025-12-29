@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Fasilitas;
 use App\Models\klinik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,12 @@ class AdminKlinikController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/Klinik/Create');
+        $fasilitas = Fasilitas::all();
+
+        return Inertia::render('Admin/Klinik/Create', [
+            'fasilitas' => $fasilitas,
+        ]);
+
     }
 
     /**
@@ -54,6 +60,7 @@ class AdminKlinikController extends Controller
             'rating' => 'nullable|numeric',
             'kapasitas_total' => 'nullable|integer|min:0',
             'kapasitas_tersedia' => 'nullable|integer|min:0',
+            'fasilitas' => 'array',
         ]);
 
         $validated['created_by'] = $user->id;
@@ -65,7 +72,11 @@ class AdminKlinikController extends Controller
 
         $klinik = Klinik::create($validated);
 
-        if (!$user->klinik_id) {
+        if ($request->filled('fasilitas')) {
+            $klinik->fasilitas()->sync($request->fasilitas);
+        }
+
+        if (! $user->klinik_id) {
             $user->update(['klinik_id' => $klinik->id]);
         }
 
@@ -102,8 +113,11 @@ class AdminKlinikController extends Controller
             abort(403, 'Admin hanya bisa mengedit klinik yang dibuatnya.');
         }
 
+        $fasilitas = Fasilitas::all();
+
         return Inertia::render('Admin/Klinik/Edit', [
-            'klinik' => $klinik,
+            'klinik' => $klinik->load('fasilitas'),
+            'fasilitas' => $fasilitas,
         ]);
     }
 
@@ -133,6 +147,8 @@ class AdminKlinikController extends Controller
             'rating' => 'nullable|numeric',
             'kapasitas_total' => 'nullable|integer|min:0',
             'kapasitas_tersedia' => 'nullable|integer|min:0',
+            'fasilitas' => 'nullable|array',
+            'fasilitas.*' => 'integer|exists:fasilitas,id',
         ]);
 
         $dataToUpdate = $validated;
@@ -141,14 +157,17 @@ class AdminKlinikController extends Controller
             if ($klinik->gambar) {
                 Storage::disk('public')->delete($klinik->gambar);
             }
-
             $path = $request->file('gambar')->store('klinik', 'public');
             $dataToUpdate['gambar'] = $path;
         }
 
         $klinik->update($dataToUpdate);
 
-        return redirect()->route('admin.klinik.index')->with('success', 'Data klinik berhasil diperbarui.');
+        // pivot update otomatis: tambah kalau ada, hapus kalau tidak ada
+        $klinik->fasilitas()->sync($request->fasilitas ?? []);
+
+        return redirect()->route('admin.klinik.index')
+            ->with('success', 'Data klinik berhasil diperbarui.');
     }
 
     /**

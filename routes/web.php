@@ -32,6 +32,7 @@ use App\Http\Controllers\ResepsionisPembayaranController;
 use App\Http\Controllers\ResepsionisStoreAntrianAndPemeriksaanFisikController;
 use App\Http\Controllers\SuperAdminAddAdminController;
 use App\Http\Controllers\SuperAdminBugReportsController;
+use App\Http\Controllers\SuperAdminFasilitasKlinikController;
 use App\Http\Controllers\SuperAdminKlinikController;
 use App\Http\Controllers\SuperAdminPasienController;
 use App\Http\Controllers\TentangKamiPageController;
@@ -61,7 +62,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
             Route::resource('bug-reports', SuperAdminBugReportsController::class)
                 ->only(['index', 'edit', 'show', 'update']);
-
+            Route::resource('fasilitas-klinik', SuperAdminFasilitasKlinikController::class)
+                ->except(['show']);
         });
 
     Route::middleware(['auth', 'role:admin'])

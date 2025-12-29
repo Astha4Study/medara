@@ -32,11 +32,13 @@ type Klinik = {
     kapasitas_tersedia?: number;
     punya_apoteker?: boolean;
     punya_server?: boolean;
-    gambar?: File | null;
+    gambar?: string | null;
+    fasilitas?: { id: number; nama: string }[]; // pivot relasi
 };
 
 type Props = {
     klinik: Klinik;
+    fasilitas: { id: number; nama: string }[]; // master list
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -44,7 +46,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Edit Klinik Kamu', href: '' },
 ];
 
-export default function KlinikEditAdmin({ klinik }: Props) {
+export default function KlinikEditAdmin({ klinik, fasilitas }: Props) {
     const { data, setData, processing, errors } = useForm({
         nama_klinik: klinik.nama_klinik ?? '',
         jenis_klinik: klinik.jenis_klinik ?? '',
@@ -61,6 +63,7 @@ export default function KlinikEditAdmin({ klinik }: Props) {
         punya_apoteker: Boolean(klinik.punya_apoteker),
         punya_server: Boolean(klinik.punya_server),
         gambar: undefined as File | undefined,
+        fasilitas: klinik.fasilitas?.map((f) => f.id) ?? [], // default badge dari pivot
     });
 
     const [alertOpen, setAlertOpen] = useState(false);
@@ -104,10 +107,14 @@ export default function KlinikEditAdmin({ klinik }: Props) {
 
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-                const safeValue = value as unknown;
-                if (safeValue instanceof Blob) formData.append(key, safeValue);
-                else formData.append(key, String(safeValue));
+            if (key === 'fasilitas') {
+                (value as number[]).forEach((id) =>
+                    formData.append('fasilitas[]', String(id)),
+                );
+            } else if (value instanceof Blob) {
+                formData.append(key, value);
+            } else if (value !== null && value !== undefined) {
+                formData.append(key, String(value));
             }
         });
 
@@ -158,6 +165,7 @@ export default function KlinikEditAdmin({ klinik }: Props) {
                             handleChangeFile={handleChangeFile}
                             processing={processing}
                             errors={errors}
+                            fasilitas={fasilitas} // master list untuk autocomplete
                         />
                     </div>
 
@@ -166,6 +174,7 @@ export default function KlinikEditAdmin({ klinik }: Props) {
                         <PreviewEditKlinik data={{ ...data, preview }} />
                     </div>
                 </div>
+
                 <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
                     <AlertDialogContent className="modal-over-map">
                         <AlertDialogHeader>
