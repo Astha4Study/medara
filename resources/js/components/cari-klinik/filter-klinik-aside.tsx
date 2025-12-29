@@ -1,7 +1,14 @@
 import { ChevronDown, Search } from 'lucide-react';
 import { useState } from 'react';
 
-const FilterKlinikAside = () => {
+type FilterProps = {
+    filters: {
+        jenis_klinik: { jenis_klinik: string; count: number }[];
+        fasilitas: { id: number; nama: string; klinik_count: number }[];
+    };
+};
+
+const FilterKlinikAside: React.FC<FilterProps> = ({ filters }) => {
     const [openSection, setOpenSection] = useState<string[]>([
         'nama-klinik',
         'jenis-klinik',
@@ -68,16 +75,9 @@ const FilterKlinikAside = () => {
 
                 {openSection.includes('jenis-klinik') && (
                     <div className="space-y-2 text-sm text-gray-700">
-                        {[
-                            ['Umum', 120],
-                            ['Gigi', 56],
-                            ['Kebidanan & Kandungan', 32],
-                            ['Anak', 44],
-                            ['THT', 21],
-                            ['Mata', 18],
-                        ].map(([label, count]) => (
+                        {filters.jenis_klinik.map((item) => (
                             <label
-                                key={label}
+                                key={item.jenis_klinik}
                                 className="flex items-center justify-between"
                             >
                                 <span className="flex items-center gap-2">
@@ -85,10 +85,10 @@ const FilterKlinikAside = () => {
                                         type="checkbox"
                                         className="accent-emerald-600"
                                     />
-                                    {label}
+                                    {item.jenis_klinik}
                                 </span>
                                 <span className="text-xs text-gray-400">
-                                    {count}
+                                    {item.count}
                                 </span>
                             </label>
                         ))}
@@ -114,15 +114,9 @@ const FilterKlinikAside = () => {
 
                 {openSection.includes('fasilitas') && (
                     <div className="space-y-2 text-sm text-gray-700">
-                        {[
-                            ['BPJS', 98],
-                            ['Parkir', 142],
-                            ['Ruang Tunggu AC', 110],
-                            ['Apotek', 65],
-                            ['Laboratorium', 40],
-                        ].map(([label, count]) => (
+                        {filters.fasilitas.map((f) => (
                             <label
-                                key={label}
+                                key={f.id}
                                 className="flex items-center justify-between"
                             >
                                 <span className="flex items-center gap-2">
@@ -130,10 +124,10 @@ const FilterKlinikAside = () => {
                                         type="checkbox"
                                         className="accent-emerald-600"
                                     />
-                                    {label}
+                                    {f.nama}
                                 </span>
                                 <span className="text-xs text-gray-400">
-                                    {count}
+                                    {f.klinik_count}
                                 </span>
                             </label>
                         ))}

@@ -7,6 +7,7 @@ use App\Models\klinik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class AdminKlinikController extends Controller
@@ -60,8 +61,31 @@ class AdminKlinikController extends Controller
             'rating' => 'nullable|numeric',
             'kapasitas_total' => 'nullable|integer|min:0',
             'kapasitas_tersedia' => 'nullable|integer|min:0',
-            'fasilitas' => 'array',
+            'fasilitas' => 'nullable|array',
+            'fasilitas.*' => 'integer|exists:fasilitas,id',
+
+            'jam_operasional' => 'nullable|array',
+            'jam_operasional.*.hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
+            'jam_operasional.*.tutup' => 'boolean',
+            // HAPUS validasi format H:i dari sini
         ]);
+
+        // Validasi: kedua jam harus diisi jika tidak tutup
+        if ($request->filled('jam_operasional')) {
+            foreach ($request->jam_operasional as $index => $jam) {
+                // Skip jika hari tutup
+                if ($jam['tutup'] ?? false) {
+                    continue;
+                }
+
+                // Validasi minimal kedua jam harus ada
+                if (empty($jam['jam_buka']) || empty($jam['jam_tutup'])) {
+                    return back()
+                        ->withErrors(["jam_operasional.{$index}" => "Jam buka dan jam tutup harus diisi untuk hari {$jam['hari']}"])
+                        ->withInput();
+                }
+            }
+        }
 
         $validated['created_by'] = $user->id;
         $validated['punya_apoteker'] = true;
@@ -76,7 +100,25 @@ class AdminKlinikController extends Controller
             $klinik->fasilitas()->sync($request->fasilitas);
         }
 
-        if (! $user->klinik_id) {
+        if ($request->filled('jam_operasional')) {
+            $openDays = collect($request->jam_operasional)->filter(fn($jam) => !($jam['tutup'] ?? false));
+            if ($openDays->isEmpty()) {
+                return back()
+                    ->withErrors(['jam_operasional' => 'Minimal 1 hari harus buka'])
+                    ->withInput();
+            }
+
+            foreach ($request->jam_operasional as $jam) {
+                $klinik->jamOperasional()->create([
+                    'hari' => $jam['hari'],
+                    'jam_buka' => $jam['tutup'] ? null : ($jam['jam_buka'] ?? null),
+                    'jam_tutup' => $jam['tutup'] ? null : ($jam['jam_tutup'] ?? null),
+                    'tutup' => $jam['tutup'] ?? false,
+                ]);
+            }
+        }
+
+        if (!$user->klinik_id) {
             $user->update(['klinik_id' => $klinik->id]);
         }
 
@@ -88,18 +130,7 @@ class AdminKlinikController extends Controller
      */
     public function show(Klinik $klinik)
     {
-        // $user = Auth::user();
-
-        // if ($klinik->created_by !== $user->id) {
-        //     abort(403, 'Anda tidak memiliki izin melihat data ini.');
-        // }
-
-        // $klinik->load(['pasien']);
-
-        // return Inertia::render('Admin/Klinik/Show', [
-        //     'klinik' => $klinik,
-        //     'pasien' => $klinik->pasien,
-        // ]);
+        //    
     }
 
     /**
@@ -116,8 +147,8 @@ class AdminKlinikController extends Controller
         $fasilitas = Fasilitas::all();
 
         return Inertia::render('Admin/Klinik/Edit', [
-            'klinik' => $klinik->load('fasilitas'),
-            'fasilitas' => $fasilitas,
+            'klinik' => $klinik->load('fasilitas', 'jamOperasional'),
+            'fasilitas' => Fasilitas::all(),
         ]);
     }
 
@@ -132,6 +163,7 @@ class AdminKlinikController extends Controller
             abort(403, 'Admin hanya bisa memperbarui klinik yang dibuatnya.');
         }
 
+        // 1. Validasi dasar tanpa format jam
         $validated = $request->validate([
             'nama_klinik' => 'required|string|max:255',
             'jenis_klinik' => 'required|in:Umum,Gigi,THT,Kulit,Kandungan,Anak,Bedah,Mata,Saraf',
@@ -149,9 +181,25 @@ class AdminKlinikController extends Controller
             'kapasitas_tersedia' => 'nullable|integer|min:0',
             'fasilitas' => 'nullable|array',
             'fasilitas.*' => 'integer|exists:fasilitas,id',
+
+            'jam_operasional' => 'nullable|array',
+            'jam_operasional.*.hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
+            'jam_operasional.*.tutup' => 'boolean',
+            // HAPUS semua validasi format jam dari sini
         ]);
 
-        $dataToUpdate = $validated;
+        // 2. Validasi sederhana: hanya cek jika tidak tutup
+        if ($request->filled('jam_operasional')) {
+            $openDays = collect($request->jam_operasional)->filter(fn($jam) => !($jam['tutup'] ?? false));
+            if ($openDays->isEmpty()) {
+                return back()
+                    ->withErrors(['jam_operasional' => 'Minimal 1 hari harus buka'])
+                    ->withInput();
+            }
+        }
+
+        // 3. Update data
+        $dataToUpdate = collect($validated)->except('jam_operasional')->toArray();
 
         if ($request->hasFile('gambar')) {
             if ($klinik->gambar) {
@@ -162,9 +210,20 @@ class AdminKlinikController extends Controller
         }
 
         $klinik->update($dataToUpdate);
-
-        // pivot update otomatis: tambah kalau ada, hapus kalau tidak ada
         $klinik->fasilitas()->sync($request->fasilitas ?? []);
+
+        // 4. Update jam operasional
+        if ($request->filled('jam_operasional')) {
+            $klinik->jamOperasional()->delete();
+            foreach ($request->jam_operasional as $jam) {
+                $klinik->jamOperasional()->create([
+                    'hari' => $jam['hari'],
+                    'jam_buka' => $jam['tutup'] ? null : ($jam['jam_buka'] ?? null),
+                    'jam_tutup' => $jam['tutup'] ? null : ($jam['jam_tutup'] ?? null),
+                    'tutup' => $jam['tutup'] ?? false,
+                ]);
+            }
+        }
 
         return redirect()->route('admin.klinik.index')
             ->with('success', 'Data klinik berhasil diperbarui.');

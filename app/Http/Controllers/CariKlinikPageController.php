@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Fasilitas;
+use App\Models\Klinik;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,7 +14,30 @@ class CariKlinikPageController extends Controller
      */
     public function index()
     {
-        return Inertia::render('(client)/CariKlinik/Index');
+        $kliniks = Klinik::with(['fasilitas', 'jamOperasional'])
+            ->latest()
+            ->get()
+            ->map(function ($klinik) {
+                $klinik->gambar = $klinik->gambar
+                    ? asset('storage/' . $klinik->gambar)
+                    : null;
+                return $klinik;
+            });
+
+        $jenisCounts = Klinik::select('jenis_klinik')
+            ->selectRaw('COUNT(*) as count')
+            ->groupBy('jenis_klinik')
+            ->get();
+
+        $fasilitasCounts = Fasilitas::withCount('kliniks')->get();
+
+        return Inertia::render('(client)/CariKlinik/Index', [
+            'kliniks' => $kliniks,
+            'filters' => [
+                'jenis_klinik' => $jenisCounts,
+                'fasilitas' => $fasilitasCounts,
+            ],
+        ]);
     }
 
     /**

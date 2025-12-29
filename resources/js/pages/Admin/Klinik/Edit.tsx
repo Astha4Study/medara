@@ -16,6 +16,13 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+type JamOperasional = {
+    hari: string;
+    jam_buka: string | null;
+    jam_tutup: string | null;
+    tutup: boolean;
+};
+
 type Klinik = {
     id: number;
     nama_klinik?: string;
@@ -33,12 +40,13 @@ type Klinik = {
     punya_apoteker?: boolean;
     punya_server?: boolean;
     gambar?: string | null;
-    fasilitas?: { id: number; nama: string }[]; // pivot relasi
+    fasilitas?: { id: number; nama: string }[];
+    jam_operasional?: JamOperasional[];
 };
 
 type Props = {
     klinik: Klinik;
-    fasilitas: { id: number; nama: string }[]; // master list
+    fasilitas: { id: number; nama: string }[];
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -63,7 +71,17 @@ export default function KlinikEditAdmin({ klinik, fasilitas }: Props) {
         punya_apoteker: Boolean(klinik.punya_apoteker),
         punya_server: Boolean(klinik.punya_server),
         gambar: undefined as File | undefined,
-        fasilitas: klinik.fasilitas?.map((f) => f.id) ?? [], // default badge dari pivot
+        fasilitas: klinik.fasilitas?.map((f) => f.id) ?? [],
+
+        jam_operasional: klinik.jam_operasional ?? [
+            { hari: 'Senin', jam_buka: '', jam_tutup: '', tutup: false },
+            { hari: 'Selasa', jam_buka: '', jam_tutup: '', tutup: false },
+            { hari: 'Rabu', jam_buka: '', jam_tutup: '', tutup: false },
+            { hari: 'Kamis', jam_buka: '', jam_tutup: '', tutup: false },
+            { hari: 'Jumat', jam_buka: '', jam_tutup: '', tutup: false },
+            { hari: 'Sabtu', jam_buka: '', jam_tutup: '', tutup: true },
+            { hari: 'Minggu', jam_buka: '', jam_tutup: '', tutup: true },
+        ],
     });
 
     const [alertOpen, setAlertOpen] = useState(false);
@@ -102,15 +120,75 @@ export default function KlinikEditAdmin({ klinik, fasilitas }: Props) {
         }
     };
 
+    const validateAllJamOperasional = () => {
+        const jamOps = data.jam_operasional as JamOperasional[];
+
+        for (const jam of jamOps) {
+            if (!jam.tutup) {
+                if (!jam.jam_buka || !jam.jam_tutup) {
+                    return `Jam buka dan jam tutup harus diisi untuk hari ${jam.hari}`;
+                }
+            }
+        }
+        return null;
+    };
+
     const handleSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
         if (e) e.preventDefault();
 
+        const jamError = validateAllJamOperasional();
+        if (jamError) {
+            toast.error('Validasi gagal', {
+                description: jamError,
+            });
+            return;
+        }
+
         const formData = new FormData();
+
         Object.entries(data).forEach(([key, value]) => {
             if (key === 'fasilitas') {
                 (value as number[]).forEach((id) =>
                     formData.append('fasilitas[]', String(id)),
                 );
+            } else if (key === 'jam_operasional') {
+                // Filter dan kirim hanya yang valid
+                const jamOpsToSend = (value as JamOperasional[]).map((jam) => ({
+                    hari: jam.hari,
+                    jam_buka: jam.tutup
+                        ? null
+                        : jam.jam_buka && jam.jam_buka !== ''
+                          ? jam.jam_buka
+                          : null,
+                    jam_tutup: jam.tutup
+                        ? null
+                        : jam.jam_tutup && jam.jam_tutup !== ''
+                          ? jam.jam_tutup
+                          : null,
+                    tutup: jam.tutup,
+                }));
+
+                jamOpsToSend.forEach((jam, i) => {
+                    formData.append(`jam_operasional[${i}][hari]`, jam.hari);
+                    formData.append(
+                        `jam_operasional[${i}][tutup]`,
+                        jam.tutup ? '1' : '0',
+                    );
+
+                    // Hanya kirim jika ada nilai (bukan null)
+                    if (jam.jam_buka !== null) {
+                        formData.append(
+                            `jam_operasional[${i}][jam_buka]`,
+                            jam.jam_buka,
+                        );
+                    }
+                    if (jam.jam_tutup !== null) {
+                        formData.append(
+                            `jam_operasional[${i}][jam_tutup]`,
+                            jam.jam_tutup,
+                        );
+                    }
+                });
             } else if (value instanceof Blob) {
                 formData.append(key, value);
             } else if (value !== null && value !== undefined) {
@@ -131,7 +209,6 @@ export default function KlinikEditAdmin({ klinik, fasilitas }: Props) {
                     description:
                         'Terjadi kesalahan saat menyimpan data klinik.',
                 });
-                console.error(err);
                 setAlertOpen(false);
             },
         });

@@ -8,8 +8,9 @@ import {
     Phone,
     X,
 } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
+import FormEditJamOperasional from './form-edit-jam-operasional';
 import MarkerDraggableOff from './mark-leaflet-off';
 
 interface FormEditKlinikAdminProps {
@@ -34,322 +35,361 @@ const FormEditKlinikAdmin: React.FC<FormEditKlinikAdminProps> = ({
     fasilitas = [],
 }) => {
     const [query, setQuery] = React.useState('');
+    const wrapperRef = useRef<HTMLDivElement>(null);
     const [suggestions, setSuggestions] = React.useState<
         { id: number; nama: string }[]
     >([]);
 
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                wrapperRef.current &&
+                !wrapperRef.current.contains(event.target as Node)
+            ) {
+                setSuggestions([]); // kosongkan suggestion
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="col-span-2 space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-        >
-            <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <Building2 className="h-4 w-4 text-emerald-600" />
-                    Nama Klinik
-                    <span className="text-red-500">*</span>
-                </label>
-                <input
-                    type="text"
-                    value={data.nama_klinik}
-                    onChange={(e) => setData('nama_klinik', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    placeholder="Masukkan Nama klinik"
-                />
-                {errors.nama_klinik && (
-                    <p className="mt-1 text-xs text-red-500">
-                        {errors.nama_klinik}
-                    </p>
-                )}
-            </div>
+        <form onSubmit={handleSubmit} autoComplete="off">
+            <div className="flex flex-col gap-6">
+                <div className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <div>
+                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                            <Building2 className="h-4 w-4 text-emerald-600" />
+                            Nama Klinik
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={data.nama_klinik}
+                            onChange={(e) =>
+                                setData('nama_klinik', e.target.value)
+                            }
+                            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                            placeholder="Masukkan Nama klinik"
+                        />
+                        {errors.nama_klinik && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.nama_klinik}
+                            </p>
+                        )}
+                    </div>
+                    {/* Jenis Klinik */}
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                            Jenis Klinik <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={data.jenis_klinik}
+                            onChange={(e) =>
+                                setData('jenis_klinik', e.target.value)
+                            }
+                            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
+                        >
+                            <option value="Umum">Umum</option>
+                            <option value="Gigi">Gigi</option>
+                            <option value="THT">THT</option>
+                            <option value="Kulit">Kulit</option>
+                            <option value="Kandungan">Kandungan</option>
+                            <option value="Anak">Anak</option>
+                            <option value="Bedah">Bedah</option>
+                            <option value="Mata">Mata</option>
+                            <option value="Saraf">Saraf</option>
+                        </select>
+                    </div>
+                    {/* Alamat */}
+                    <div>
+                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                            <MapPin className="h-4 w-4 text-emerald-600" />{' '}
+                            Alamat <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={data.alamat}
+                            onChange={(e) => setData('alamat', e.target.value)}
+                            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
+                            placeholder="Alamat lengkap"
+                        />
+                    </div>
+                    {/* Kota & Provinsi */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <input
+                            type="text"
+                            value={data.kota}
+                            onChange={(e) => setData('kota', e.target.value)}
+                            className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
+                            placeholder="Kota"
+                        />
+                        <input
+                            type="text"
+                            value={data.provinsi}
+                            onChange={(e) =>
+                                setData('provinsi', e.target.value)
+                            }
+                            className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
+                            placeholder="Provinsi"
+                        />
+                    </div>
+                    {/* Telepon & Email */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                <Phone className="h-4 w-4 text-emerald-600" />
+                                Telepon <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={data.no_telepon}
+                                onChange={(e) =>
+                                    setData('no_telepon', e.target.value)
+                                }
+                                className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                <Mail className="h-4 w-4 text-emerald-600" />{' '}
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                value={data.email}
+                                onChange={(e) =>
+                                    setData('email', e.target.value)
+                                }
+                                className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
+                            />
+                        </div>
+                    </div>
+                    {/* Kapasitas */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                <BedDouble className="h-4 w-4 text-emerald-600" />{' '}
+                                Kapasitas Total{' '}
+                                <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={data.kapasitas_total}
+                                onChange={(e) =>
+                                    setData(
+                                        'kapasitas_total',
+                                        Number(e.target.value),
+                                    )
+                                }
+                                className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                Tempat Tersedia{' '}
+                                <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={data.kapasitas_tersedia}
+                                onChange={(e) =>
+                                    setData(
+                                        'kapasitas_tersedia',
+                                        Number(e.target.value) || 0,
+                                    )
+                                }
+                                className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
+                            />
+                        </div>
+                    </div>
+                    {/* Koordinat */}
+                    <div>
+                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                            <Globe2 className="h-4 w-4 text-emerald-600" />
+                            Koordinat Lokasi{' '}
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <input
+                                type="text"
+                                disabled
+                                placeholder="Latitude"
+                                value={data.latitude}
+                                onChange={(e) =>
+                                    setData('latitude', e.target.value)
+                                }
+                                className="rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                            />
+                            <input
+                                type="text"
+                                disabled
+                                placeholder="Longitude"
+                                value={data.longitude}
+                                onChange={(e) =>
+                                    setData('longitude', e.target.value)
+                                }
+                                className="rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                            />
+                        </div>
+                    </div>
+                    {/* Peta Lokasi */}
+                    <div className="mt-4 h-[300px] w-full overflow-hidden rounded-lg border border-gray-200">
+                        <MapContainer
+                            center={[
+                                Number(data.latitude) || -7.7956,
+                                Number(data.longitude) || 110.3695,
+                            ]} // default: Yogyakarta
+                            zoom={13}
+                            style={{ height: '100%', width: '100%' }}
+                            scrollWheelZoom={true}
+                        >
+                            <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <MarkerDraggableOff
+                                latitude={data.latitude}
+                                longitude={data.longitude}
+                                setData={setData}
+                            />
+                        </MapContainer>
+                    </div>
+                    {/* Deskripsi */}
+                    <div>
+                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                            Deskripsi <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            value={data.deskripsi}
+                            onChange={(e) =>
+                                setData('deskripsi', e.target.value)
+                            }
+                            rows={4}
+                            placeholder="Tuliskan deskripsi singkat tentang klinik..."
+                            className="w-full resize-none rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                        />
+                    </div>
+                    {/* Fasilitas */}
+                    <div className="relative" ref={wrapperRef}>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                            Fasilitas <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setQuery(value);
+                                setSuggestions(
+                                    fasilitas.filter((f) =>
+                                        f.nama
+                                            .toLowerCase()
+                                            .includes(value.toLowerCase()),
+                                    ),
+                                );
+                            }}
+                            placeholder="Cari fasilitas..."
+                            className="w-full rounded-lg border px-3 py-2 text-sm"
+                        />
 
-            {/* Jenis Klinik */}
-            <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Jenis Klinik <span className="text-red-500">*</span>
-                </label>
-                <select
-                    value={data.jenis_klinik}
-                    onChange={(e) => setData('jenis_klinik', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
-                >
-                    <option value="Umum">Umum</option>
-                    <option value="Gigi">Gigi</option>
-                    <option value="THT">THT</option>
-                    <option value="Kulit">Kulit</option>
-                    <option value="Kandungan">Kandungan</option>
-                    <option value="Anak">Anak</option>
-                    <option value="Bedah">Bedah</option>
-                    <option value="Mata">Mata</option>
-                    <option value="Saraf">Saraf</option>
-                </select>
-            </div>
+                        {/* daftar saran melayang */}
+                        {suggestions.length > 0 && (
+                            <ul className="absolute z-10 mt-1 w-full rounded-lg border bg-white shadow">
+                                {suggestions.map((f) => (
+                                    <li
+                                        key={f.id}
+                                        onClick={() => {
+                                            if (
+                                                !data.fasilitas.includes(f.id)
+                                            ) {
+                                                setData('fasilitas', [
+                                                    ...data.fasilitas,
+                                                    f.id,
+                                                ]); // ➕ tambah fasilitas baru
+                                            }
+                                            setQuery('');
+                                            setSuggestions([]);
+                                        }}
+                                        className="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                                    >
+                                        {f.nama}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
 
-            {/* Alamat */}
-            <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <MapPin className="h-4 w-4 text-emerald-600" /> Alamat{' '}
-                    <span className="text-red-500">*</span>
-                </label>
-                <input
-                    type="text"
-                    value={data.alamat}
-                    onChange={(e) => setData('alamat', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
-                    placeholder="Alamat lengkap"
-                />
-            </div>
-
-            {/* Kota & Provinsi */}
-            <div className="grid grid-cols-2 gap-4">
-                <input
-                    type="text"
-                    value={data.kota}
-                    onChange={(e) => setData('kota', e.target.value)}
-                    className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
-                    placeholder="Kota"
-                />
-                <input
-                    type="text"
-                    value={data.provinsi}
-                    onChange={(e) => setData('provinsi', e.target.value)}
-                    className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
-                    placeholder="Provinsi"
-                />
-            </div>
-
-            {/* Telepon & Email */}
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                        <Phone className="h-4 w-4 text-emerald-600" />
-                        Telepon <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        value={data.no_telepon}
-                        onChange={(e) => setData('no_telepon', e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
-                    />
+                        {/* badge fasilitas terpilih */}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            {data.fasilitas.map((id: number) => {
+                                const f = fasilitas.find((x) => x.id === id);
+                                return (
+                                    <span
+                                        key={id}
+                                        className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700"
+                                    >
+                                        {f?.nama}
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setData(
+                                                    'fasilitas',
+                                                    data.fasilitas.filter(
+                                                        (fid: number) =>
+                                                            fid !== id,
+                                                    ), // ➖ hapus fasilitas
+                                                )
+                                            }
+                                            className="ml-2 text-emerald-600 hover:text-emerald-800"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    {/* Gambar */}
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                            Gambar
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleChangeFile}
+                            className="block w-full rounded-lg border border-gray-200 text-sm text-gray-700 file:rounded-lg file:bg-emerald-50 file:px-4 file:py-2 file:text-emerald-700"
+                        />
+                    </div>
                 </div>
-                <div>
-                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                        <Mail className="h-4 w-4 text-emerald-600" /> Email
-                    </label>
-                    <input
-                        type="email"
-                        value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
+                <div className="space-y-6 rounded-xl border border-gray-200 bg-white shadow-sm">
+                    <FormEditJamOperasional
+                        value={data.jam_operasional}
+                        onChange={(val) => setData('jam_operasional', val)}
                     />
+
+                    <div className="mt-4 flex justify-end gap-3 rounded-b-xl border-t border-gray-200 bg-gray-50 px-6 py-4">
+                        <Link
+                            href="/admin/klinik"
+                            className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                            Batal
+                        </Link>
+                        <button
+                            type="submit"
+                            disabled={processing || !isDirty}
+                            className={`rounded-lg px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed ${
+                                processing || !isDirty
+                                    ? 'bg-emerald-600 opacity-50'
+                                    : 'bg-emerald-600 hover:bg-emerald-700'
+                            }`}
+                        >
+                            {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
+                        </button>
+                    </div>
                 </div>
-            </div>
-
-            {/* Kapasitas */}
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                        <BedDouble className="h-4 w-4 text-emerald-600" />{' '}
-                        Kapasitas Total <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="number"
-                        value={data.kapasitas_total}
-                        onChange={(e) =>
-                            setData('kapasitas_total', Number(e.target.value))
-                        }
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
-                    />
-                </div>
-                <div>
-                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                        Tempat Tersedia <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="number"
-                        value={data.kapasitas_tersedia}
-                        onChange={(e) =>
-                            setData(
-                                'kapasitas_tersedia',
-                                Number(e.target.value) || 0,
-                            )
-                        }
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
-                    />
-                </div>
-            </div>
-
-            {/* Koordinat */}
-            <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <Globe2 className="h-4 w-4 text-emerald-600" />
-                    Koordinat Lokasi <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                    <input
-                        type="text"
-                        disabled
-                        placeholder="Latitude"
-                        value={data.latitude}
-                        onChange={(e) => setData('latitude', e.target.value)}
-                        className="rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                    <input
-                        type="text"
-                        disabled
-                        placeholder="Longitude"
-                        value={data.longitude}
-                        onChange={(e) => setData('longitude', e.target.value)}
-                        className="rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                </div>
-            </div>
-
-            {/* Peta Lokasi */}
-            <div className="mt-4 h-[300px] w-full overflow-hidden rounded-lg border border-gray-200">
-                <MapContainer
-                    center={[
-                        Number(data.latitude) || -7.7956,
-                        Number(data.longitude) || 110.3695,
-                    ]} // default: Yogyakarta
-                    zoom={13}
-                    style={{ height: '100%', width: '100%' }}
-                    scrollWheelZoom={true}
-                >
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <MarkerDraggableOff
-                        latitude={data.latitude}
-                        longitude={data.longitude}
-                        setData={setData}
-                    />
-                </MapContainer>
-            </div>
-
-            {/* Deskripsi */}
-            <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                    Deskripsi <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                    value={data.deskripsi}
-                    onChange={(e) => setData('deskripsi', e.target.value)}
-                    rows={4}
-                    placeholder="Tuliskan deskripsi singkat tentang klinik..."
-                    className="w-full resize-none rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                />
-            </div>
-
-            {/* Fasilitas */}
-            <div className="relative">
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Fasilitas
-                </label>
-                <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => {
-                        const value = e.target.value;
-                        setQuery(value);
-                        setSuggestions(
-                            fasilitas.filter((f) =>
-                                f.nama
-                                    .toLowerCase()
-                                    .includes(value.toLowerCase()),
-                            ),
-                        );
-                    }}
-                    placeholder="Cari fasilitas..."
-                    className="w-full rounded-lg border px-3 py-2 text-sm"
-                />
-
-                {/* daftar saran melayang */}
-                {suggestions.length > 0 && (
-                    <ul className="absolute z-10 mt-1 w-full rounded-lg border bg-white shadow">
-                        {suggestions.map((f) => (
-                            <li
-                                key={f.id}
-                                onClick={() => {
-                                    if (!data.fasilitas.includes(f.id)) {
-                                        setData('fasilitas', [
-                                            ...data.fasilitas,
-                                            f.id,
-                                        ]); // ➕ tambah fasilitas baru
-                                    }
-                                    setQuery('');
-                                    setSuggestions([]);
-                                }}
-                                className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-                            >
-                                {f.nama}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-
-                {/* badge fasilitas terpilih */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                    {data.fasilitas.map((id: number) => {
-                        const f = fasilitas.find((x) => x.id === id);
-                        return (
-                            <span
-                                key={id}
-                                className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700"
-                            >
-                                {f?.nama}
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setData(
-                                            'fasilitas',
-                                            data.fasilitas.filter(
-                                                (fid: number) => fid !== id,
-                                            ), // ➖ hapus fasilitas
-                                        )
-                                    }
-                                    className="ml-2 text-emerald-600 hover:text-emerald-800"
-                                >
-                                    <X size={14} />
-                                </button>
-                            </span>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Gambar */}
-            <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Gambar
-                </label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleChangeFile}
-                    className="block w-full rounded-lg border border-gray-200 text-sm text-gray-700 file:rounded-lg file:bg-emerald-50 file:px-4 file:py-2 file:text-emerald-700"
-                />
-            </div>
-
-            <div className="mt-4 flex justify-end gap-3">
-                <Link
-                    href="/admin/klinik"
-                    className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                    Batal
-                </Link>
-                <button
-                    type="submit"
-                    disabled={processing || !isDirty}
-                    className={`rounded-lg px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed ${
-                        processing || !isDirty
-                            ? 'bg-emerald-600 opacity-50'
-                            : 'bg-emerald-600 hover:bg-emerald-700'
-                    }`}
-                >
-                    {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
-                </button>
             </div>
         </form>
     );

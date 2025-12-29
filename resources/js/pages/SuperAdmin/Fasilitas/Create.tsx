@@ -51,7 +51,7 @@ export default function FasilitasCreateSuperAdmin() {
                 <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
                     <form onSubmit={handleSubmit} autoComplete="off">
                         <div className="p-6">
-                            <div className="max-w-xl">
+                            <div className="w-full">
                                 <label className="mb-2 block text-sm font-medium text-gray-700">
                                     Nama Fasilitas{' '}
                                     <span className="text-red-500">*</span>
