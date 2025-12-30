@@ -8,9 +8,12 @@ import { toast } from 'sonner';
 export default function DaftarObatCreateApoteker() {
     const { data, setData, processing, post, reset, errors } = useForm({
         nama_obat: '',
+        jenis_obat: '',
         satuan: '',
         stok: 0,
         harga: '',
+        tanggal_expired: '',
+        penggunaan_obat: '',
     });
 
     const handleChange = (

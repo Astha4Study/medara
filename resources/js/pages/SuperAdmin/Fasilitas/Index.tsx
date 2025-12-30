@@ -1,10 +1,21 @@
 import DropdownMenuFasilitas from '@/components/dropdown-menu-fasilitas-klinik';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Inertia } from '@inertiajs/inertia';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Filter, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 type Fasilitas = {
     id: number;
@@ -21,6 +32,7 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Daftar Fasilitas', href: '' }];
 export default function FasilitasIndexSuperAdmin() {
     const { fasilitas } = usePage<PageProps>().props;
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
     const toggleSelect = (id: number) =>
@@ -37,12 +49,23 @@ export default function FasilitasIndexSuperAdmin() {
 
     const deleteSelected = () => {
         if (selectedIds.length === 0) return;
-        if (confirm(`Yakin ingin menghapus ${selectedIds.length} fasilitas?`)) {
-            selectedIds.forEach((id) =>
-                Inertia.delete(`/super-admin/fasilitas/${id}`),
-            );
-            setSelectedIds([]);
-        }
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = () => {
+        selectedIds.forEach((id, index) =>
+            Inertia.delete(`/super-admin/fasilitas-klinik/${id}`, {
+                onSuccess: () => {
+                    toast.success('Fasilitas berhasil dihapus');
+                },
+                onFinish: () => {
+                    if (index === selectedIds.length - 1) {
+                        setSelectedIds([]);
+                        setShowDeleteModal(false);
+                    }
+                },
+            }),
+        );
     };
 
     const filtered = fasilitas.filter((f) =>
@@ -210,6 +233,33 @@ export default function FasilitasIndexSuperAdmin() {
                     </div>
                 )}
             </div>
+            {showDeleteModal && (
+                <AlertDialog
+                    open={showDeleteModal}
+                    onOpenChange={setShowDeleteModal}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Yakin ingin menghapus?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Kamu akan menghapus {selectedIds.length}{' '}
+                                fasilitas. Tindakan ini tidak dapat dibatalkan.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={confirmDelete}
+                                className="bg-red-600 text-white hover:bg-red-700"
+                            >
+                                Ya, Hapus
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
         </AppLayout>
     );
 }

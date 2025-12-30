@@ -34,6 +34,7 @@ class AdminAddResepsionisAndApotekerAndDoktorController extends Controller
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
             'role' => 'admin',
+            'klinik' => $admin->klinik,
         ]);
     }
 

@@ -1,8 +1,15 @@
 import KlinikSection from '@/components/cari-klinik/klinik-section';
-import SearchSection from '@/components/cari-klinik/search-section';
 import LandingLayout from '@/layouts/landing-layout';
+import { usePage } from '@inertiajs/react';
 
-export type Klinik = {
+type JamOperasional = {
+    hari: string;
+    jam_buka: string | null;
+    jam_tutup: string | null;
+    tutup: number;
+};
+
+type Klinik = {
     id: number;
     nama_klinik: string;
     jenis_klinik: string;
@@ -17,7 +24,7 @@ export type Klinik = {
     kapasitas_total: number;
     kapasitas_tersedia: number;
     fasilitas: { id: number; nama: string }[];
-    jam_operasional: { hari: string; buka: string; tutup: string }[];
+    jam_operasional: JamOperasional[];
 };
 
 type Filters = {
@@ -31,10 +38,11 @@ type Props = {
 };
 
 export default function CariKlinikIndexPage({ kliniks, filters }: Props) {
+    const { url } = usePage();
+
     return (
         <LandingLayout>
-            <SearchSection />
-            <KlinikSection kliniks={kliniks} filters={filters} />
+            <KlinikSection kliniks={kliniks} filters={filters} url={url} />
         </LandingLayout>
     );
 }

@@ -6,9 +6,23 @@ type FilterProps = {
         jenis_klinik: { jenis_klinik: string; count: number }[];
         fasilitas: { id: number; nama: string; klinik_count: number }[];
     };
+    searchQuery: string;
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    selectedJenis: string[]; // ubah jadi array untuk checklist
+    setSelectedJenis: React.Dispatch<React.SetStateAction<string[]>>;
+    selectedFasilitas: number[];
+    setSelectedFasilitas: React.Dispatch<React.SetStateAction<number[]>>;
 };
 
-const FilterKlinikAside: React.FC<FilterProps> = ({ filters }) => {
+const FilterKlinikAside: React.FC<FilterProps> = ({
+    filters,
+    searchQuery,
+    setSearchQuery,
+    selectedJenis,
+    setSelectedJenis,
+    selectedFasilitas,
+    setSelectedFasilitas,
+}) => {
     const [openSection, setOpenSection] = useState<string[]>([
         'nama-klinik',
         'jenis-klinik',
@@ -23,9 +37,15 @@ const FilterKlinikAside: React.FC<FilterProps> = ({ filters }) => {
         );
     };
 
+    const clearFilters = () => {
+        setSearchQuery('');
+        setSelectedJenis([]);
+        setSelectedFasilitas([]);
+    };
+
     return (
-        <aside className="sticky top-20 w-full max-w-xs rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <h3 className="mb-4 text-sm font-semibold text-gray-900">
+        <aside className="h-fit w-full max-w-xs self-start rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <h3 className="mb-4 text-xl font-semibold text-gray-900">
                 Filter Klinik
             </h3>
 
@@ -50,6 +70,8 @@ const FilterKlinikAside: React.FC<FilterProps> = ({ filters }) => {
                         <input
                             type="text"
                             placeholder="Cari nama klinik"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-9 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none"
                         />
                         <Search className="absolute top-2.5 right-3 h-4 w-4 text-gray-400" />
@@ -83,6 +105,25 @@ const FilterKlinikAside: React.FC<FilterProps> = ({ filters }) => {
                                 <span className="flex items-center gap-2">
                                     <input
                                         type="checkbox"
+                                        checked={selectedJenis.includes(
+                                            item.jenis_klinik,
+                                        )}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setSelectedJenis([
+                                                    ...selectedJenis,
+                                                    item.jenis_klinik,
+                                                ]);
+                                            } else {
+                                                setSelectedJenis(
+                                                    selectedJenis.filter(
+                                                        (j) =>
+                                                            j !==
+                                                            item.jenis_klinik,
+                                                    ),
+                                                );
+                                            }
+                                        }}
                                         className="accent-emerald-600"
                                     />
                                     {item.jenis_klinik}
@@ -97,7 +138,7 @@ const FilterKlinikAside: React.FC<FilterProps> = ({ filters }) => {
             </div>
 
             {/* Fasilitas */}
-            <div>
+            <div className="mb-5">
                 <button
                     onClick={() => toggleSection('fasilitas')}
                     className="mb-2 flex w-full items-center justify-between text-sm font-medium text-gray-800"
@@ -122,6 +163,23 @@ const FilterKlinikAside: React.FC<FilterProps> = ({ filters }) => {
                                 <span className="flex items-center gap-2">
                                     <input
                                         type="checkbox"
+                                        checked={selectedFasilitas.includes(
+                                            f.id,
+                                        )}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setSelectedFasilitas([
+                                                    ...selectedFasilitas,
+                                                    f.id,
+                                                ]);
+                                            } else {
+                                                setSelectedFasilitas(
+                                                    selectedFasilitas.filter(
+                                                        (id) => id !== f.id,
+                                                    ),
+                                                );
+                                            }
+                                        }}
                                         className="accent-emerald-600"
                                     />
                                     {f.nama}
@@ -134,6 +192,14 @@ const FilterKlinikAside: React.FC<FilterProps> = ({ filters }) => {
                     </div>
                 )}
             </div>
+
+            {/* Clear Filter */}
+            <button
+                onClick={clearFilters}
+                className="mt-4 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            >
+                Clear Filter
+            </button>
         </aside>
     );
 };

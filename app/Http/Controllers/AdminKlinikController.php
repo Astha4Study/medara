@@ -7,7 +7,6 @@ use App\Models\klinik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class AdminKlinikController extends Controller
@@ -48,7 +47,7 @@ class AdminKlinikController extends Controller
 
         $validated = $request->validate([
             'nama_klinik' => 'required|string|max:255',
-            'jenis_klinik' => 'required|in:Umum,Gigi,THT,Kulit,Kandungan,Anak,Bedah,Mata,Saraf',
+            'jenis_klinik' => 'required|in:Umum,Gigi,Kebidanan & Kandungan,Anak,Kulit & Kelamin,THT,Mata,Fisioterapi',
             'alamat' => 'required|string',
             'kota' => 'required|string',
             'provinsi' => 'nullable|string|max:255',
@@ -67,7 +66,6 @@ class AdminKlinikController extends Controller
             'jam_operasional' => 'nullable|array',
             'jam_operasional.*.hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'jam_operasional.*.tutup' => 'boolean',
-            // HAPUS validasi format H:i dari sini
         ]);
 
         // Validasi: kedua jam harus diisi jika tidak tutup
@@ -101,7 +99,7 @@ class AdminKlinikController extends Controller
         }
 
         if ($request->filled('jam_operasional')) {
-            $openDays = collect($request->jam_operasional)->filter(fn($jam) => !($jam['tutup'] ?? false));
+            $openDays = collect($request->jam_operasional)->filter(fn ($jam) => ! ($jam['tutup'] ?? false));
             if ($openDays->isEmpty()) {
                 return back()
                     ->withErrors(['jam_operasional' => 'Minimal 1 hari harus buka'])
@@ -118,7 +116,7 @@ class AdminKlinikController extends Controller
             }
         }
 
-        if (!$user->klinik_id) {
+        if (! $user->klinik_id) {
             $user->update(['klinik_id' => $klinik->id]);
         }
 
@@ -130,7 +128,7 @@ class AdminKlinikController extends Controller
      */
     public function show(Klinik $klinik)
     {
-        //    
+        //
     }
 
     /**
@@ -166,7 +164,7 @@ class AdminKlinikController extends Controller
         // 1. Validasi dasar tanpa format jam
         $validated = $request->validate([
             'nama_klinik' => 'required|string|max:255',
-            'jenis_klinik' => 'required|in:Umum,Gigi,THT,Kulit,Kandungan,Anak,Bedah,Mata,Saraf',
+            'jenis_klinik' => 'required|in:Umum,Gigi,Kebidanan & Kandungan,Anak,Kulit & Kelamin,THT,Mata,Fisioterapi',
             'alamat' => 'required|string',
             'kota' => 'required|string',
             'provinsi' => 'nullable|string|max:255',
@@ -190,7 +188,7 @@ class AdminKlinikController extends Controller
 
         // 2. Validasi sederhana: hanya cek jika tidak tutup
         if ($request->filled('jam_operasional')) {
-            $openDays = collect($request->jam_operasional)->filter(fn($jam) => !($jam['tutup'] ?? false));
+            $openDays = collect($request->jam_operasional)->filter(fn ($jam) => ! ($jam['tutup'] ?? false));
             if ($openDays->isEmpty()) {
                 return back()
                     ->withErrors(['jam_operasional' => 'Minimal 1 hari harus buka'])

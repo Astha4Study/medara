@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BugReports;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class AdminBugReportsController extends Controller
@@ -22,6 +23,7 @@ class AdminBugReportsController extends Controller
 
         return Inertia::render('Admin/BugReports/Index', [
             'bugReports' => $bugReports,
+            'klinik' => $user->klinik,
         ]);
     }
 
@@ -30,6 +32,13 @@ class AdminBugReportsController extends Controller
      */
     public function create()
     {
+        $user = Auth::user();
+
+        if (! $user->klinik_id) {
+            return redirect('/admin/klinik')
+                ->with('error', 'Anda harus membuat fasilitas klinik terlebih dahulu sebelum melaporkan bug.');
+        }
+
         return Inertia::render('Admin/BugReports/Create');
     }
 

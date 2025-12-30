@@ -26,8 +26,12 @@ class DashboardController extends Controller
 
         $user = $request->user();
         $role = $user->roles->first()?->name ?? 'default';
+
+        if ($role === 'pasien') {
+            return redirect('/');
+        }
+
         $klinik = $user->klinik;
-        $period = $request->get('period', 'week');
         $dokter = $user->dokter;
         $klinikDokter = $dokter?->klinik;
 
@@ -37,6 +41,7 @@ class DashboardController extends Controller
             'dokter' => $this->renderDokterDashboard($dokter, $klinikDokter),
             'resepsionis' => $this->renderResepsionisDashboard($user, $klinik),
             'apoteker' => $this->renderApotekerDashboard($user, $klinik),
+            default => redirect('/'),
         };
     }
 

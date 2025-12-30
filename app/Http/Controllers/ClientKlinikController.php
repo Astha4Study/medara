@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Klinik;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ClientKlinikController extends Controller
@@ -37,12 +38,14 @@ class ClientKlinikController extends Controller
      */
     public function show(string $slug)
     {
-        if (!preg_match('/-(\d+)$/', $slug, $m)) {
+        if (! preg_match('/-(\d+)$/', $slug, $m)) {
             abort(404);
         }
         $id = (int) $m[1];
 
-        $klinik = Klinik::findOrFail($id);
+        $klinik = Klinik::with(['fasilitas', 'jamOperasional'])->findOrFail($id);
+
+        $klinik->slug = Str::slug($klinik->nama_klinik) . '-' . $klinik->id;
 
         $klinik->gambar = asset('storage/'.$klinik->gambar);
 

@@ -92,15 +92,19 @@ const FormEditKlinikAdmin: React.FC<FormEditKlinikAdminProps> = ({
                             }
                             className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700"
                         >
+                            <option value="">Pilih Jenis Klinik</option>
                             <option value="Umum">Umum</option>
                             <option value="Gigi">Gigi</option>
-                            <option value="THT">THT</option>
-                            <option value="Kulit">Kulit</option>
-                            <option value="Kandungan">Kandungan</option>
+                            <option value="Kebidanan & Kandungan">
+                                Kebidanan & Kandungan
+                            </option>
                             <option value="Anak">Anak</option>
-                            <option value="Bedah">Bedah</option>
+                            <option value="Kulit & Kelamin">
+                                Kulit & Kelamin
+                            </option>
+                            <option value="THT">THT</option>
                             <option value="Mata">Mata</option>
-                            <option value="Saraf">Saraf</option>
+                            <option value="Fisioterapi">Fisioterapi</option>
                         </select>
                     </div>
                     {/* Alamat */}

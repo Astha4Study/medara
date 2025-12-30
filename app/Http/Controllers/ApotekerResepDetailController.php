@@ -47,9 +47,11 @@ class ApotekerResepDetailController extends Controller
             $total = 0;
 
             foreach ($request->detail as $item) {
-                $harga = Obat::where('id', $item['obat_id'])
+                $obat = Obat::where('id', $item['obat_id'])
                     ->where('klinik_id', $resep->klinik_id)
-                    ->value('harga') ?? 0;
+                    ->first();
+
+                $harga = $obat?->harga ?? 0;
                 $total += $item['jumlah'] * $harga;
 
                 $resep->resepDetail()->create([
@@ -59,6 +61,14 @@ class ApotekerResepDetailController extends Controller
                     'jumlah' => $item['jumlah'],
                     'harga_satuan' => $harga,
                 ]);
+
+                if ($obat) {
+                    if ($obat->stok >= $item['jumlah']) {
+                        $obat->decrement('stok', $item['jumlah']);
+                    } else {
+                        $obat->update(['stok' => 0]);
+                    }
+                }
             }
 
             $resep->update(['total_harga' => $total, 'status' => 'selesai']);

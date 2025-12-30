@@ -7,6 +7,7 @@ import dummy2 from '@/assets/image/dummy-2.jpg';
 import dummy3 from '@/assets/image/dummy-3.jpg';
 import dummy4 from '@/assets/image/dummy-4.jpg';
 import heroImage from '@/assets/image/hero-image.jpg';
+import { router } from '@inertiajs/react';
 
 const API_KEY = import.meta.env.VITE_WEATHERAPI_KEY;
 
@@ -27,6 +28,7 @@ type WeatherType = 'clear' | 'clouds' | 'rain' | 'storm' | 'unknown';
 
 const HeroSection = () => {
     const [query, setQuery] = useState('');
+    const [jenis, setJenis] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +43,13 @@ const HeroSection = () => {
                 d.toLowerCase().startsWith(value.toLowerCase()),
             ),
         );
+    };
+
+    const handleCari = () => {
+        router.get('/cari-klinik', {
+            q: query || undefined,
+            jenis: jenis || undefined,
+        });
     };
 
     useEffect(() => {
@@ -188,10 +197,12 @@ const HeroSection = () => {
                                 <div className="relative" ref={wrapperRef}>
                                     <input
                                         type="text"
-                                        placeholder="Lokasi"
+                                        placeholder="Nama klinik atau daerah"
                                         value={query}
-                                        onChange={handleChange}
-                                        className="w-full rounded-full border border-gray-300 bg-white px-3 py-2 text-sm focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 focus:outline-none"
+                                        onChange={(e) =>
+                                            setQuery(e.target.value)
+                                        }
+                                        className="w-full rounded-full border px-3 py-2 text-sm"
                                     />
                                     {suggestions.length > 0 && (
                                         <ul className="absolute bottom-full z-10 mb-4 w-full rounded-lg border bg-white shadow">
@@ -211,17 +222,26 @@ const HeroSection = () => {
                                     )}
                                 </div>
 
-                                <select className="rounded-full border border-gray-300 bg-white px-3 py-2 text-sm focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 focus:outline-none">
-                                    <option>Jenis Layanan</option>
-                                    <option>Umum</option>
-                                    <option>Gigi</option>
-                                    <option>Kebidanan & Kandungan</option>
-                                    <option>Anak</option>
-                                    <option>THT</option>
-                                    <option>Mata</option>
+                                <select
+                                    value={jenis}
+                                    onChange={(e) => setJenis(e.target.value)}
+                                    className="rounded-full border px-3 py-2 text-sm"
+                                >
+                                    <option value="">Semua Layanan</option>
+                                    <option value="Umum">Umum</option>
+                                    <option value="Gigi">Gigi</option>
+                                    <option value="Kebidanan & Kandungan">
+                                        Kebidanan & Kandungan
+                                    </option>
+                                    <option value="Anak">Anak</option>
+                                    <option value="THT">THT</option>
+                                    <option value="Mata">Mata</option>
                                 </select>
 
-                                <button className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                                <button
+                                    onClick={handleCari}
+                                    className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                                >
                                     Cari Klinik
                                 </button>
                             </div>

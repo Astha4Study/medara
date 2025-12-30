@@ -17,6 +17,7 @@ class Obat extends Model
         'jenis_obat',
         'satuan',
         'stok',
+        'tanggal_expired',
         'harga',
         'penggunaan_obat',
     ];

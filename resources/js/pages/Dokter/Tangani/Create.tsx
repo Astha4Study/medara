@@ -27,6 +27,7 @@ type Props = {
     antrian: any;
     pemeriksaan_fisik: any;
     punya_server: number;
+    punya_apoteker: boolean;
     layanan: any[];
 };
 
@@ -43,6 +44,7 @@ export default function TindakanCreateDokter({
     klinik,
     antrian,
     punya_server,
+    punya_apoteker,
     pemeriksaan_fisik,
     layanan,
 }: Props) {
@@ -194,24 +196,26 @@ export default function TindakanCreateDokter({
                     />
 
                     {/* Switch butuh resep */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-900">
-                                    Resep Obat{' '}
-                                    <span className="text-red-500">*</span>
-                                </h3>
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Apakah pasien memerlukan resep obat?
-                                </p>
+                    {punya_apoteker && (
+                        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-900">
+                                        Resep Obat{' '}
+                                        <span className="text-red-500">*</span>
+                                    </h3>
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Apakah pasien memerlukan resep obat?
+                                    </p>
+                                </div>
+                                <Switch
+                                    className="data-[state=checked]:bg-emerald-600"
+                                    checked={butuhResep}
+                                    onCheckedChange={setButuhResep}
+                                />
                             </div>
-                            <Switch
-                                className="data-[state=checked]:bg-emerald-600"
-                                checked={butuhResep}
-                                onCheckedChange={setButuhResep}
-                            />
                         </div>
-                    </div>
+                    )}
 
                     {/* Form catatan */}
                     <FormCreateCatatanLayananDokter

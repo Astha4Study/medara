@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetailLayanan;
+use App\Models\Klinik;
 use App\Models\Layanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,8 @@ class AdminLayananController extends Controller
     {
         $user = Auth::user();
 
+        $klinik = Klinik::where('created_by', $user->id)->first();
+
         $layanan = Layanan::with('detail_layanan')
             ->where('klinik_id', $user->klinik_id)
             ->orderBy('nama_layanan', 'asc')
@@ -24,7 +27,8 @@ class AdminLayananController extends Controller
 
         return Inertia::render('Admin/Layanan/Index', [
             'layanan' => $layanan,
-            'role' => Auth::user()->role,
+            'role' => $user->role,
+            'klinik' => $klinik,
         ]);
     }
 
@@ -33,7 +37,18 @@ class AdminLayananController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/Layanan/Create');
+        $user = Auth::user();
+
+        $klinik = Klinik::where('created_by', $user->id)->first();
+
+        if (! $klinik) {
+            return redirect()->route('admin.klinik.index')
+                ->with('error', 'Anda harus membuat klinik terlebih dahulu sebelum menambah layanan.');
+        }
+
+        return Inertia::render('Admin/Layanan/Create', [
+            'klinik' => $klinik,
+        ]);
     }
 
     /**

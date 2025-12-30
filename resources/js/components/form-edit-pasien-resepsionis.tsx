@@ -115,7 +115,7 @@ const FormEditPasienResepsionis: React.FC<FormEditPasienResepsionisProps> = ({
                     {/* Tempat Lahir */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Tempat Lahir <span className="text-red-500">*</span>
+                            Tempat Lahir
                         </label>
                         <input
                             type="text"
@@ -125,7 +125,7 @@ const FormEditPasienResepsionis: React.FC<FormEditPasienResepsionisProps> = ({
                                 setData('tempat_lahir', e.target.value)
                             }
                             className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
-                            placeholder="Masukkan tempat lahir"
+                            placeholder="Masukkan tempat lahir (opsional)"
                         />
                         {errors.tempat_lahir && (
                             <p className="mt-1.5 text-sm text-red-600">

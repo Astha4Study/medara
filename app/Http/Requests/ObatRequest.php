@@ -26,6 +26,7 @@ class ObatRequest extends FormRequest
             'jenis_obat' => 'required|in:tablet,kapsul,sachet,sirup,injeksi,salep',
             'satuan' => 'required|in:strip,sachet,box,botol,ampul,tube',
             'stok' => 'required|integer|min:0',
+            'tanggal_expired' => 'required|date',
             'harga' => 'required|integer|min:0',
             'penggunaan_obat' => 'required|string|max:2000',
         ];

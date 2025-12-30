@@ -9,6 +9,7 @@ type DaftarObat = {
     jenis_obat: string;
     satuan: string;
     stok: number;
+    tanggal_expired: string;
     harga: number;
     penggunaan_obat: string;
 };
@@ -28,6 +29,7 @@ export default function DaftarObatEditApoteker({ obat }: props) {
         jenis_obat: obat.jenis_obat || 'tablet',
         satuan: obat.satuan || 'strip',
         stok: obat.stok || 0,
+        tanggal_expired: obat.tanggal_expired || '',
         harga: Number(obat.harga),
         penggunaan_obat: obat.penggunaan_obat || '',
     });

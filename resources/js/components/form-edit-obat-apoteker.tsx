@@ -122,7 +122,7 @@ export default function FormEditObatApoteker({
                     </div>
 
                     {/* Harga */}
-                    <div className="md:col-span-2">
+                    <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">
                             Harga <span className="text-red-500">*</span>
                         </label>
@@ -145,6 +145,29 @@ export default function FormEditObatApoteker({
                         {errors.harga && (
                             <p className="mt-1 text-sm text-red-600">
                                 {errors.harga}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Tanggal Expired */}
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                            Tanggal Expired{' '}
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            name="tanggal_expired"
+                            value={data.tanggal_expired}
+                            onChange={(e) =>
+                                setData('tanggal_expired', e.target.value)
+                            }
+                            min={new Date().toISOString().split('T')[0]}
+                            className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
+                        />
+                        {errors.tanggal_expired && (
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.tanggal_expired}
                             </p>
                         )}
                     </div>

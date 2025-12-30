@@ -3,9 +3,10 @@ import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Inertia } from '@inertiajs/inertia';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Filter, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface Layanan {
     id: number;
@@ -35,7 +36,8 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Daftar Layanan', href: '' }];
 
 export default function LayananIndexAdmin() {
     const { props } = usePage<PageProps>();
-    const { layanan } = props;
+    const { layanan, flash } = usePage<PageProps>().props;
+    const { klinik } = usePage<PageProps>().props;
 
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -66,6 +68,21 @@ export default function LayananIndexAdmin() {
     const handleDelete = (id: number) => {
         if (confirm('Apakah Anda yakin ingin menghapus layanan ini?')) {
             Inertia.delete(`/admin/layanan/${id}`);
+        }
+    };
+
+    const handleCreateClick = () => {
+        if (!klinik) {
+            router.visit('/admin/klinik', {
+                method: 'get',
+                onSuccess: () => {
+                    toast.error(
+                        'Anda harus membuat klinik terlebih dahulu sebelum menambah layanan.',
+                    );
+                },
+            });
+        } else {
+            router.visit('/admin/layanan/create');
         }
     };
 
@@ -108,13 +125,13 @@ export default function LayananIndexAdmin() {
                         </button>
                     </div>
 
-                    <Link
-                        href="/admin/layanan/create"
+                    <button
+                        onClick={handleCreateClick}
                         className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
                     >
                         <Plus className="h-4 w-4" />
                         Tambah Layanan
-                    </Link>
+                    </button>
                 </div>
 
                 {/* Table */}

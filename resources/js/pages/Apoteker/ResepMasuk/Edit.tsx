@@ -62,6 +62,7 @@ type Props = {
         satuan: string;
         harga: number;
         penggunaan_obat: string;
+        stok: number;
     }[];
 };
 

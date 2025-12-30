@@ -153,6 +153,27 @@ const FormCreateObatApoteker: React.FC<FormCreateObatApotekerProps> = ({
                             </p>
                         )}
                     </div>
+
+                    {/* Tanggal Expired */}
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                            Tanggal Expired{' '}
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            name="tanggal_expired"
+                            value={data.tanggal_expired}
+                            onChange={handleChange}
+                            min={new Date().toISOString().split('T')[0]}
+                            className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm"
+                        />
+                        {errors.tanggal_expired && (
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.tanggal_expired}
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {/* Penggunaan Obat */}

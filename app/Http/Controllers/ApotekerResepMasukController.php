@@ -79,11 +79,11 @@ class ApotekerResepMasukController extends Controller
             'pasien.pemeriksaanFisik',
             'catatanLayanan:id,diagnosa',
             'resepDetail.obat:id,nama_obat,satuan,harga',
-            'klinik:id,punya_server', 
+            'klinik:id,punya_server',
         ])->findOrFail($id);
 
         $obatMaster = Obat::where('klinik_id', $resep->klinik_id)
-            ->select('id', 'nama_obat', 'jenis_obat', 'satuan', 'harga', 'penggunaan_obat')
+            ->select('id', 'nama_obat', 'jenis_obat', 'satuan', 'harga', 'penggunaan_obat', 'stok')
             ->orderBy('nama_obat')
             ->get();
 

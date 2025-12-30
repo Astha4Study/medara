@@ -98,13 +98,16 @@ const FormCreateKlinik: React.FC<FormCreateKlinikProps> = ({
                             <option value="">Pilih Jenis Klinik</option>
                             <option value="Umum">Umum</option>
                             <option value="Gigi">Gigi</option>
-                            <option value="THT">THT</option>
-                            <option value="Kulit">Kulit</option>
-                            <option value="Kandungan">Kandungan</option>
+                            <option value="Kebidanan & Kandungan">
+                                Kebidanan & Kandungan
+                            </option>
                             <option value="Anak">Anak</option>
-                            <option value="Bedah">Bedah</option>
+                            <option value="Kulit & Kelamin">
+                                Kulit & Kelamin
+                            </option>
+                            <option value="THT">THT</option>
                             <option value="Mata">Mata</option>
-                            <option value="Saraf">Saraf</option>
+                            <option value="Fisioterapi">Fisioterapi</option>
                         </select>
                     </div>
 

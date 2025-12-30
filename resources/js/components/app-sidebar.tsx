@@ -55,6 +55,11 @@ export function AppSidebar() {
 
     const allMainNavItems: NavItem[] = [
         { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+        {
+            title: 'Pendaftaran Online',
+            href: `${prefix}/pasien-online`,
+            icon: ClipboardList,
+        },
         { title: 'Pasien', href: `${prefix}/pasien`, icon: Users },
         { title: 'Antrian', href: `${prefix}/antrian`, icon: Ticket },
         { title: 'Klinik', href: `${prefix}/klinik`, icon: Hospital },
@@ -115,9 +120,17 @@ export function AppSidebar() {
             footer: ['Tambah User', 'Bug Reports', 'Pengaturan'],
         },
         resepsionis: {
-            main: ['Dashboard', 'Pasien', 'Antrian', 'Klinik', 'Pembayaran'],
+            main: [
+                'Dashboard',
+                'Pasien',
+                'Antrian',
+                'Pendaftaran Online',
+                'Klinik',
+                'Pembayaran',
+            ],
             footer: [],
         },
+
         dokter: {
             main: [
                 'Dashboard',
@@ -161,9 +174,12 @@ export function AppSidebar() {
         {
             title: 'Manajemen Pasien',
             items: mainNavItems.filter((i) =>
-                ['Pasien', 'Antrian', 'Catatan Layanan Pasien'].includes(
-                    i.title,
-                ),
+                [
+                    'Pasien',
+                    'Antrian',
+                    'Pendaftaran Online',
+                    'Catatan Layanan Pasien',
+                ].includes(i.title),
             ),
         },
         {

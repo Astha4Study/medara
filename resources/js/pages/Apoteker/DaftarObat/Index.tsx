@@ -53,7 +53,6 @@ export default function DaftarObatIndexApoteker() {
         setSelectedIds([]);
     };
 
-
     const filteredDaftarObat = obat.filter((o) =>
         o.nama_obat.toLowerCase().includes(searchQuery.toLowerCase()),
     );
@@ -171,7 +170,7 @@ export default function DaftarObatIndexApoteker() {
                                                 {formatRupiah(item.harga)}
                                             </td>
 
-                                            <td className="px-6 py-4 text-center">
+                                            <td className="flex justify-center px-6 py-4">
                                                 <DropdownObatApoteker
                                                     id={item.id}
                                                     namaObat={item.nama_obat}

@@ -13,13 +13,15 @@ class LandingPageController extends Controller
      */
     public function index()
     {
-        $kliniks = Klinik::orderByDesc('rating')
+        $kliniks = Klinik::with('jamOperasional')
+            ->orderByDesc('rating')
             ->where('kapasitas_tersedia', '>', 0)
             ->limit(6)
             ->get()
             ->map(fn ($k) => [
                 ...$k->toArray(),
                 'gambar' => asset('storage/'.$k->gambar),
+                'jam_operasional' => $k->jamOperasional, // relasi
             ]);
 
         return Inertia::render('(client)/Landing/Index', [

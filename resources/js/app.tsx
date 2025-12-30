@@ -1,4 +1,6 @@
 import '../css/app.css';
+import 'swiper/css';
+import 'swiper/css/effect-fade';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type Obat = {
@@ -6,6 +7,7 @@ type Obat = {
     nama_obat: string;
     satuan: string;
     harga: number;
+    stok: number;
     penggunaan_obat: string;
 };
 
@@ -120,9 +122,9 @@ export default function FormCreateResep({
                                     <button
                                         type="button"
                                         onClick={() => hapusObat(idx)}
-                                        className="rounded-md px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                                        className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-200"
                                     >
-                                        Hapus
+                                        <Trash2 size={14} /> Hapus
                                     </button>
                                 </div>
 
@@ -155,17 +157,35 @@ export default function FormCreateResep({
 
                                     <div>
                                         <label className="mb-1 block text-sm font-medium text-gray-700">
-                                            Jumlah
+                                            Jumlah{' '}
+                                            <span className="text-emerald-600">
+                                                {item.obat_id
+                                                    ? `(Stok: ${obat_list.find((o) => o.id === item.obat_id)?.stok ?? 0})`
+                                                    : ''}
+                                            </span>
                                         </label>
                                         <input
                                             type="number"
                                             min={1}
+                                            max={
+                                                obat_list.find(
+                                                    (o) =>
+                                                        o.id === item.obat_id,
+                                                )?.stok ?? 1
+                                            }
                                             value={item.jumlah}
                                             onChange={(e) =>
                                                 updateObat(
                                                     idx,
                                                     'jumlah',
-                                                    Number(e.target.value),
+                                                    Math.min(
+                                                        Number(e.target.value),
+                                                        obat_list.find(
+                                                            (o) =>
+                                                                o.id ===
+                                                                item.obat_id,
+                                                        )?.stok ?? 1,
+                                                    ),
                                                 )
                                             }
                                             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
@@ -209,6 +229,13 @@ export default function FormCreateResep({
                         <button
                             type="button"
                             onClick={tambahBaris}
+                            disabled={resepObat.some(
+                                (item) =>
+                                    item.obat_id &&
+                                    (obat_list.find(
+                                        (o) => o.id === item.obat_id,
+                                    )?.stok ?? 0) === 0,
+                            )}
                             className="w-full rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-emerald-500 hover:text-emerald-600"
                         >
                             + Tambah Obat

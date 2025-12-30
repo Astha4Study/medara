@@ -12,8 +12,11 @@ use App\Http\Controllers\ApotekerPenyerahanObatController;
 use App\Http\Controllers\ApotekerResepController;
 use App\Http\Controllers\ApotekerResepDetailController;
 use App\Http\Controllers\ApotekerResepMasukController;
-use App\Http\Controllers\CariKlinikPageController;
+use App\Http\Controllers\ClientCariKlinikPageController;
 use App\Http\Controllers\ClientKlinikController;
+use App\Http\Controllers\ClientPasienOnlineController;
+use App\Http\Controllers\ClientProfileController;
+use App\Http\Controllers\ClientRiwayatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DokterAntrianController;
 use App\Http\Controllers\DokterCatatanLayananController;
@@ -28,6 +31,7 @@ use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\ResepsionisAntrianController;
 use App\Http\Controllers\ResepsionisKlinikController;
 use App\Http\Controllers\ResepsionisPasienController;
+use App\Http\Controllers\ResepsionisPasienOnlineController;
 use App\Http\Controllers\ResepsionisPembayaranController;
 use App\Http\Controllers\ResepsionisStoreAntrianAndPemeriksaanFisikController;
 use App\Http\Controllers\SuperAdminAddAdminController;
@@ -40,13 +44,21 @@ use App\Http\Controllers\UntukKlinikController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
-Route::get('/cari-klinik', [CariKlinikPageController::class, 'index']);
+Route::get('/cari-klinik', [ClientCariKlinikPageController::class, 'index']);
 Route::get('/untuk-klinik', [UntukKlinikController::class, 'index']);
 Route::get('/tentang-kami', [TentangKamiPageController::class, 'index']);
 Route::get('/kontak-kami', [KontakKamiPageController::class, 'index']);
+Route::get('/profile', [ClientProfileController::class, 'index']);
+Route::get('/riwayat', [ClientRiwayatController::class, 'index']);
 
 Route::get('/klinik/{slug}', [ClientKlinikController::class, 'show'])
     ->name('klinik.detail');
+Route::get('/klinik/{slug}/daftar-online', [ClientPasienOnlineController::class, 'create'])
+    ->name('daftar-online.create');
+Route::post('/klinik/{slug}/daftar-online', [ClientPasienOnlineController::class, 'store'])
+    ->name('daftar-online.store');
+Route::get('/klinik/{slug}/daftar-online/{pasienOnline}', [ClientPasienOnlineController::class, 'success'])
+    ->name('daftar-online.success');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'verified']);
@@ -116,6 +128,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('pembayaran.update');
             Route::get('pembayaran', [ResepsionisPembayaranController::class, 'index'])
                 ->name('pembayaran.index');
+            Route::resource('pasien-online', ResepsionisPasienOnlineController::class)
+                ->only('index', 'show', 'edit', 'update');
         });
 
     Route::middleware(['auth', 'role:dokter'])

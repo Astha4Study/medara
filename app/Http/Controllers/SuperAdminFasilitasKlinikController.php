@@ -60,7 +60,7 @@ class SuperAdminFasilitasKlinikController extends Controller
      */
     public function edit(string $id)
     {
-                $fasilitas = Fasilitas::findOrFail($id);
+        $fasilitas = Fasilitas::findOrFail($id);
 
         return Inertia::render('SuperAdmin/Fasilitas/Edit', [
             'fasilitas' => $fasilitas,
@@ -76,7 +76,7 @@ class SuperAdminFasilitasKlinikController extends Controller
         $fasilitas = Fasilitas::findOrFail($id);
 
         $request->validate([
-            'nama' => 'required|string|max:255|unique:fasilitas,nama,' . $fasilitas->id,
+            'nama' => 'required|string|max:255|unique:fasilitas,nama,'.$fasilitas->id,
         ]);
 
         $fasilitas->update([
@@ -84,7 +84,7 @@ class SuperAdminFasilitasKlinikController extends Controller
         ]);
 
         return redirect()->route('super_admin.fasilitas-klinik.index')
-                         ->with('success', 'Fasilitas berhasil diperbarui.');
+            ->with('success', 'Fasilitas berhasil diperbarui.');
 
     }
 
@@ -97,6 +97,6 @@ class SuperAdminFasilitasKlinikController extends Controller
         $fasilitas->delete();
 
         return redirect()->route('super_admin.fasilitas-klinik.index')
-                         ->with('success', 'Fasilitas berhasil dihapus.');
+            ->with('success', 'Fasilitas berhasil dihapus.');
     }
 }

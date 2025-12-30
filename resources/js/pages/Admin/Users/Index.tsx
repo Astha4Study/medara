@@ -2,7 +2,7 @@ import DropdownUsersAdmin from '@/components/dropdown-users-admin';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Inertia } from '@inertiajs/inertia';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Filter, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -24,7 +24,9 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Daftar User', href: '' }];
 
 export default function UsersIndexAdmin() {
     const { props } = usePage<PageProps>();
-    const { users } = props;
+    const { users, flash, klinik } = usePage<PageProps>().props;
+
+    const hasKlinik = !!klinik;
 
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -61,6 +63,20 @@ export default function UsersIndexAdmin() {
                 }),
             );
             setSelectedIds([]);
+        }
+    };
+
+    const handleCreateClick = () => {
+        if (!hasKlinik) {
+            router.visit('/admin/klinik', {
+                onSuccess: () => {
+                    toast.error(
+                        'Anda harus membuat fasilitas klinik terlebih dahulu sebelum menambahkan user.',
+                    );
+                },
+            });
+        } else {
+            router.visit('/admin/tambah-user/create');
         }
     };
 
@@ -123,13 +139,13 @@ export default function UsersIndexAdmin() {
                         </button>
                     </div>
 
-                    <Link
-                        href="/admin/tambah-user/create"
-                        className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+                    <button
+                        onClick={handleCreateClick}
+                        className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
                     >
                         <Plus className="h-4 w-4" />
                         Tambah User
-                    </Link>
+                    </button>
                 </div>
 
                 {/* Table */}

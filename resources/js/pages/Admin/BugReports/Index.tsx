@@ -1,9 +1,10 @@
 import DropdownBugReportsAdmin from '@/components/dropdown-bug-reports-admin';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Filter, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 type BugReport = {
     id: number;
@@ -53,13 +54,27 @@ const statusColor: Record<
 };
 
 export default function BugReportsIndexAdmin() {
-    const { bugReports } = usePage<PageProps>().props;
+    const { bugReports, klinik } = usePage<PageProps>().props;
     const bugs = bugReports.data ?? [];
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredBugs = bugs.filter((bug) =>
         bug.judul.toLowerCase().includes(searchQuery.toLowerCase()),
     );
+
+    const handleCreateClick = () => {
+        if (!klinik) {
+            router.visit('/admin/klinik', {
+                onSuccess: () => {
+                    toast.error(
+                        'Anda harus membuat fasilitas klinik terlebih dahulu sebelum melaporkan bug.',
+                    );
+                },
+            });
+        } else {
+            router.visit('/admin/bug-reports/create');
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -95,13 +110,13 @@ export default function BugReportsIndexAdmin() {
                         </button>
                     </div>
 
-                    <Link
-                        href="/admin/bug-reports/create"
+                    <button
+                        onClick={handleCreateClick}
                         className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
                     >
                         <Plus className="h-4 w-4" />
                         Laporkan Bug
-                    </Link>
+                    </button>
                 </div>
 
                 {/* Table */}

@@ -49,6 +49,8 @@ class DokterTanganiController extends Controller
             'klinik' => $antrian->klinik->only('id', 'jenis_klinik'),
             'layanan' => $layanan,
             'punya_server' => $antrian->klinik->punya_server,
+            'punya_apoteker' => $antrian->klinik->punya_apoteker,
+
         ]);
     }
 

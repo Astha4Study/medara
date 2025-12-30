@@ -1,16 +1,32 @@
 import { Link } from '@inertiajs/react';
+import { ArrowRight, Bed, Clock, MapPin, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type Koordinat = { lat: number; lng: number };
+
+type JamOperasional = {
+    hari: string; // contoh: "Senin"
+    jam_buka: string | null; // contoh: "08:00"
+    jam_tutup: string | null; // contoh: "16:00"
+    tutup: number; // 0 = buka, 1 = tutup
+};
 
 type Klinik = {
     id: number;
     nama_klinik: string;
     jenis_klinik: string;
-    gambar: string;
+    alamat: string;
     kota: string;
+    provinsi?: string;
+    deskripsi: string;
     latitude: number;
     longitude: number;
+    rating?: number;
+    gambar: string;
+    kapasitas_total: number;
+    kapasitas_tersedia: number;
+    fasilitas: { id: number; nama: string }[];
+    jam_operasional: JamOperasional[];
 };
 
 type Props = { kliniks: Klinik[] };
@@ -91,27 +107,111 @@ const NearLocationSection = ({ kliniks }: Props) => {
                     </p>
                 </div>
 
-                <div className="grid gap-8 md:grid-cols-3">
+                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                     {display.map((k) => {
                         const url = `/klinik/${slug(k.nama_klinik)}-${k.id}`;
+                        const rating = k.rating ?? 4.6;
+
                         return (
-                            <Link key={k.id} href={url} className="group block">
-                                <div className="relative overflow-hidden rounded-md">
+                            <Link
+                                key={k.id}
+                                href={url}
+                                className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-md"
+                            >
+                                {/* IMAGE */}
+                                <div className="relative h-52 overflow-hidden">
                                     <img
                                         src={k.gambar}
                                         alt={k.nama_klinik}
-                                        className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
+                                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                                     />
+
+                                    {/* Rating badge di kanan atas */}
+                                    <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-lg bg-white/90 px-2 py-1 text-sm font-semibold text-gray-900 shadow">
+                                        <Star className="h-3.5 w-3.5 text-yellow-500" />
+                                        {rating}
+                                    </div>
                                 </div>
-                                <div className="mt-4">
-                                    <h3 className="text-base font-semibold text-gray-900">
-                                        {k.nama_klinik}
-                                    </h3>
-                                    <p className="text-sm text-gray-500">
-                                        {k.jenis_klinik} • {k.kota}
-                                        {k.jarak !== undefined &&
-                                            ` • ±${k.jarak.toFixed(1)} km`}
-                                    </p>
+
+                                {/* CONTENT */}
+                                <div className="space-y-3 p-5">
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between gap-3">
+                                        <h3 className="line-clamp-1 text-xl font-semibold text-gray-900">
+                                            {k.nama_klinik}
+                                        </h3>
+
+                                        <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white shadow">
+                                            {k.jenis_klinik}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {/* Alamat */}
+                                        <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
+                                            <MapPin className="h-3.5 w-3.5" />
+                                            {k.alamat}, {k.kota}
+                                            {k.jarak !== undefined && (
+                                                <span className="ml-1 text-emerald-600">
+                                                    • ±{k.jarak.toFixed(1)} km
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Jam Operasional */}
+                                        {(() => {
+                                            const hariList = [
+                                                'Senin',
+                                                'Selasa',
+                                                'Rabu',
+                                                'Kamis',
+                                                'Jumat',
+                                                'Sabtu',
+                                                'Minggu',
+                                            ];
+
+                                            const hariBuka = k.jam_operasional
+                                                ?.filter((j) => j.tutup === 0)
+                                                .map((j) => j.hari)
+                                                .sort(
+                                                    (a, b) =>
+                                                        hariList.indexOf(a) -
+                                                        hariList.indexOf(b),
+                                                );
+
+                                            if (
+                                                !hariBuka ||
+                                                hariBuka.length === 0
+                                            )
+                                                return null;
+
+                                            return (
+                                                <p className="flex items-center gap-1 text-xs text-gray-500">
+                                                    <Clock className="h-3.5 w-3.5 text-gray-400" />
+                                                    {hariBuka[0]}
+                                                    {hariBuka[0] !==
+                                                        hariBuka[
+                                                            hariBuka.length - 1
+                                                        ] &&
+                                                        ` - ${hariBuka[hariBuka.length - 1]}`}
+                                                </p>
+                                            );
+                                        })()}
+
+                                        {/* Kapasitas */}
+                                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                                            <Bed className="h-4 w-4 text-gray-500" />
+                                            {k.kapasitas_tersedia}/
+                                            {k.kapasitas_total} tempat tidur
+                                        </div>
+                                    </div>
+
+                                    {/* CTA */}
+                                    <div className="pt-2 mt-auto">
+                                        <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 transition group-hover:gap-2">
+                                            Lihat Detail
+                                            <ArrowRight className="h-4 w-4" />
+                                        </span>
+                                    </div>
                                 </div>
                             </Link>
                         );
@@ -120,8 +220,8 @@ const NearLocationSection = ({ kliniks }: Props) => {
 
                 <div className="mt-16 text-center">
                     <Link
-                        href="/klinik"
-                        className="rounded-md bg-yellow-400 px-6 py-3 text-sm font-semibold text-gray-900 transition hover:bg-yellow-500"
+                        href="/cari-klinik"
+                        className="rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
                     >
                         Lihat Semua Klinik
                     </Link>

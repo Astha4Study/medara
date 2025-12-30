@@ -6,23 +6,29 @@ import NearLocationSection from '@/components/landing-page/near-location-section
 import WhyChooseUsSection from '@/components/landing-page/why-choose-us-section';
 import LandingLayout from '@/layouts/landing-layout';
 
+type JamOperasional = {
+    hari: string;
+    jam_buka: string | null;
+    jam_tutup: string | null;
+    tutup: number; 
+};
+
 type Klinik = {
     id: number;
-    kode_klinik: string;
     nama_klinik: string;
     jenis_klinik: string;
     alamat: string;
     kota: string;
-    provinsi: string;
-    no_telepon: string;
-    email: string;
+    provinsi?: string;
     deskripsi: string;
     latitude: number;
     longitude: number;
+    rating?: number;
     gambar: string;
-    rating: number;
     kapasitas_total: number;
     kapasitas_tersedia: number;
+    fasilitas: { id: number; nama: string }[];
+    jam_operasional: JamOperasional[];
 };
 
 type PageProps = {
