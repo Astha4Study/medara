@@ -49,8 +49,8 @@ Route::get('/cari-klinik', [ClientCariKlinikPageController::class, 'index']);
 Route::get('/untuk-klinik', [UntukKlinikController::class, 'index']);
 Route::get('/tentang-kami', [TentangKamiPageController::class, 'index']);
 Route::get('/kontak-kami', [KontakKamiPageController::class, 'index']);
-Route::get('/profile', [ClientProfileController::class, 'index']);
-Route::get('/riwayat', [ClientRiwayatController::class, 'index']);
+Route::get('/profile', [ClientProfileController::class, 'profileIndex'])->name('profile.ProfileIndex');
+Route::get('/riwayat', [ClientProfileController::class, 'riwayatIndex'])->name('profile.riwayatIndex');
 
 Route::get('/klinik/{slug}', [ClientKlinikController::class, 'show'])
     ->name('klinik.detail');

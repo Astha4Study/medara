@@ -1,6 +1,13 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, LogOut, Menu, User, X } from 'lucide-react';
+import {
+    ArrowUpRight,
+    LayoutDashboard,
+    LogOut,
+    Menu,
+    User,
+    X,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import logo from '@/assets/svg/logo.svg';
@@ -15,6 +22,7 @@ type UserType = {
 type PageProps = {
     auth: {
         user: UserType | null;
+        roles?: string[];
     };
 };
 
@@ -29,11 +37,24 @@ const getInitials = (name = '') =>
 export default function Navbar() {
     const { auth } = usePage<PageProps>().props;
     const user = auth?.user;
+    const roles = auth?.roles ?? [];
     const isLoggedIn = !!user;
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [openAvatarMenu, setOpenAvatarMenu] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+
+    const allowedRoles = [
+        'super_admin',
+        'admin',
+        'resepsionis',
+        'dokter',
+        'apoteker',
+    ];
+
+    const canAccessDashboard = roles.some((role) =>
+        allowedRoles.includes(role),
+    );
 
     useEffect(() => {
         const handleScroll = () => {
@@ -167,10 +188,7 @@ export default function Navbar() {
                                                         opacity: 1,
                                                         y: 0,
                                                     }}
-                                                    exit={{
-                                                        opacity: 0,
-                                                        y: -8,
-                                                    }}
+                                                    exit={{ opacity: 0, y: -8 }}
                                                     transition={{
                                                         duration: 0.2,
                                                     }}
@@ -188,6 +206,25 @@ export default function Navbar() {
                                                         <User size={16} />
                                                         Profil
                                                     </Link>
+
+                                                    {/* Kondisi untuk role tertentu */}
+                                                    {canAccessDashboard && (
+                                                        <Link
+                                                            href="/dashboard"
+                                                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
+                                                            onClick={() =>
+                                                                setOpenAvatarMenu(
+                                                                    false,
+                                                                )
+                                                            }
+                                                        >
+                                                            <LayoutDashboard
+                                                                size={16}
+                                                            />
+                                                            Dashboard
+                                                        </Link>
+                                                    )}
+
                                                     <button
                                                         onClick={handleLogout}
                                                         className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -283,6 +320,17 @@ export default function Navbar() {
                                 <User className="h-4 w-4 text-gray-400" />
                                 Profil
                             </Link>
+
+                            {canAccessDashboard && (
+                                <Link
+                                    href="/dashboard"
+                                    className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <LayoutDashboard className="h-4 w-4 text-gray-400" />
+                                    Dashboard
+                                </Link>
+                            )}
 
                             <button
                                 onClick={handleLogout}
